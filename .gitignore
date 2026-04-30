@@ -1,0 +1,8 @@
+# Only track explicitly added skills
+*
+!.gitignore
+!README.md
+!productivity/
+productivity/*
+!productivity/agent-constitution-setup/
+!productivity/agent-constitution-setup/**
