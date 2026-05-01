@@ -33,9 +33,11 @@ Single-file Python script — zero external dependencies.
 | `kk tag <id> <tag>...` | Attach tags |
 | `kk untag <id> <tag>...` | Detach tags |
 | `kk delete <id>` | Delete a bookmark |
-| `kk sync [--enrich]` | Pull new bookmarks → vault; use --enrich for transcripts/content |
+| `kk sync [--enrich]` | Pull new bookmarks → vault; --enrich fetches transcripts/content |
 | `kk push` | Push vault note changes → Karakeep (if configured) |
 | `kk enrich <id>` | Fetch YouTube transcript or article content for a single bookmark |
+| `kk enrich --next` | Enrich the next un-enriched YouTube bookmark (newest first) |
+| `kk enrich --list` | Show YouTube enrichment queue and progress |
 | `kk config [--set key=val]` | Show or update configuration |
 
 None of the CRUD commands (`list`, `get`, `add`, `text`, `note`, `edit`, `tag`, `untag`, `delete`) require a vault. Sync and push only work if `vault_path` is configured.
@@ -89,57 +91,27 @@ Bookmarks can be enriched with additional content before saving to the vault:
 
 **Commands:**
 - `kk enrich <id>` — enrich a single bookmark and preview the result
+- `kk enrich --next` — auto-find the next un-enriched YouTube bookmark (newest first) and add transcript to the vault note
+- `kk enrich --list` — show progress: total YouTube bookmarks, how many enriched, how many remaining
 - `kk sync --enrich` — sync new bookmarks and auto-enrich each one
 
-Enrichment is best-effort. If fetching fails, the note is still saved with Karakeep's existing content.
+**Pacing pattern:** For existing bookmarks, use `kk enrich --next` in a daily cron to process one per day. This avoids hammering the API and gives you a daily artifact to review. Typical pace: 26 bookmarks → ~1 month to catch up.
 
-The cron default is `kk sync` without `--enrich` because enrichment adds latency (transcript fetching, page downloads). Run with `--enrich` periodically or when you want deep content in new bookmarks.
+Enrichment is best-effort. If fetching fails (no uv, no curl, network timeout), the note is still saved with Karakeep's existing content. The cron default is `kk sync` without `--enrich` because enrichment adds latency (transcript fetching, page downloads).
 
-### Vault path inference design
+### Vault path inference
 
-```json
-{
-  "url": "https://hoarder.example.com",
-  "api_key": "ak2_...",
-  "vault_path": "~/my-vault/003_Resources/Bookmarks",
-  "daily_path": "~/my-vault/002_Journal/daily"
-}
-```
-
-- `vault_path` — where synced bookmarks go as `.md` files (sync/push only)
-### What push does
-
-Scans your vault for edited `## Notes` sections and pushes changes back to the bookmark's note field in Karakeep.
-
-### Enrichment
-
-Bookmarks can be enriched with additional content before saving to the vault:
-
-| Type | Enrichment | How |
-|------|-----------|-----|
-| YouTube links | Full transcript (25K+ chars) | `youtube-transcript-api` via `uv run --with` |
-| Article links | Readable text extraction | `curl` + Python's built-in `html.parser` |
-
-**Commands:**
-- `kk enrich <id>` — enrich a single bookmark and preview the result
-- `kk sync --enrich` — sync new bookmarks and auto-enrich each one
-
-Enrichment is best-effort. If fetching fails, the note is still saved with Karakeep's existing content.
-
-The cron default is `kk sync` without `--enrich` because enrichment adds latency (transcript fetching, page downloads). Run with `--enrich` periodically or when you want deep content in new bookmarks.
-
-### Vault path inference design
-
-When `daily_path` is not explicitly set, the tool infers it from `vault_path`
-using a PARA-structure heuristic. See `references/vault-path-inference.md`.
+When `daily_path` is not explicitly set, the tool infers it from `vault_path` using a PARA-structure heuristic. See `references/vault-path-inference.md`.
 
 ### Automation (cron)
 
 ```cron
-0 8 * * * /home/user/.local/bin/kk sync
+# Daily sync + enrichment (both run at midnight, enrich 10 min later)
+0 0 * * * /home/user/.local/bin/kk sync
+10 0 * * * /home/user/.local/bin/kk enrich --next
 ```
 
-No push cron by default — editing notes in your vault should be intentional.
+Push has no cron by default — editing notes in your vault should be intentional.
 
 ## Note Format
 
@@ -156,6 +128,18 @@ tags: [tag1, tag2]
 ```
 
 No personal tags or conventions are baked in. Notes link back to `[[_Index|Bookmarks]]` which works from any vault folder structure.
+
+## Design Principles for General Distribution
+
+This skill was refactored from a personal tool to a distributable one. Key lessons embedded in the design:
+
+- **CLI-first, features second.** The core CRUD commands must work without any vault configuration. Sync and push are opt-in.
+- **No default paths.** Never write files to a location the user didn't explicitly configure.
+- **Interactive onboarding, but skippable.** `kk login` asks about vault setup, but you can hit enter to skip and configure later.
+- **Relative backlinks.** `[[_Index|Bookmarks]]` works from any vault folder — no hardcoded paths.
+- **No personal conventions.** Status tags, PARA structure assumptions, and author-specific frontmatter fields are excluded from generated content.
+- **Graceful degradation.** If uv or curl are missing, enrichment silently skips rather than crashing. The note still gets created.
+- **Best-effort enrichment.** YouTube transcripts via uv (tool installed on-the-fly, no permanent dependency). Article text via curl + stdlib HTML parsing. Failures don't block the sync.
 
 ## Known Pitfalls
 
