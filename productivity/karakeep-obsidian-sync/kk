@@ -1,35 +1,38 @@
 #!/usr/bin/env python3
 """
-kk — Karakeep CLI. Full CRUD + bidirectional Obsidian sync.
+kk — Karakeep CLI. Full CRUD for self-hosted bookmarking, with optional Obsidian vault sync.
 
 Usage:
-  kk login <url> <api_key> [--vault PATH]  Configure + optional vault setup
-  kk list [--limit N]                       List recent bookmarks
-  kk get <id>                                Get bookmark details as JSON
-  kk add <url>                               Save a link bookmark
-  kk text <content>                          Save a text bookmark
-  kk note <id> [text]                       View or update note on a bookmark
-  kk edit <id> --title= --note=             Update bookmark fields
-  kk tag <id> <tag>...                       Attach tags to a bookmark
-  kk untag <id> <tag>...                     Detach tags from a bookmark
-  kk delete <id>                             Delete a bookmark
-  kk sync                                    Pull new bookmarks → Obsidian vault
-  kk push                                    Push vault note changes → Karakeep
-  kk config [--set key=val]                 Show or update config
+  kk login <url> <api_key>                    Configure connection
+  kk list [--limit N]                         List recent bookmarks
+  kk get <id>                                  Get bookmark details as JSON
+  kk add <url>                                 Save a link bookmark
+  kk text <content>                            Save a text bookmark
+  kk note <id> [text]                         View or update note on a bookmark
+  kk edit <id> --title= --note=               Update bookmark fields
+  kk tag <id> <tag>...                         Attach tags to a bookmark
+  kk untag <id> <tag>...                       Detach tags from a bookmark
+  kk delete <id>                               Delete a bookmark
+  kk sync                                      Pull new bookmarks → Obsidian vault (if configured)
+  kk push                                      Push vault note changes → Karakeep (if configured)
+  kk config [--set key=val]                   Show or update configuration
+  kk logout                                    Wipe saved config and state
 """
 
 import os, sys, json, re, argparse, urllib.request, urllib.error
 from datetime import datetime, timezone
 from pathlib import Path
 
-# ── Defaults ──────────────────────────────────────────────────────────────
+# ── Config ────────────────────────────────────────────────────────────────
 CONFIG_DIR = Path.home() / ".config" / "kk"
 CONFIG_FILE = CONFIG_DIR / "config.json"
 STATE_FILE = CONFIG_DIR / "state.json"
-DEFAULT_WEB_CLIPS = str(Path.home() / "obsidian" / "personal-vault" / "Web Clips")
 
+DESCRIPTION = """
+Karakeep CLI — full CRUD for your self-hosted bookmarking instance.
+Obsidian vault sync is optional; all CRUD commands work without it.
+"""
 
-# ── Config helpers ────────────────────────────────────────────────────────
 
 def load_config():
     if not CONFIG_FILE.exists():
@@ -57,11 +60,33 @@ def save_state(state):
         json.dump(state, f, indent=2)
 
 
-def get_web_clips_dir():
-    """Return the Web Clips directory from config or the default."""
+def get_vault_dir():
+    """Return the vault bookmarks directory, or None if not configured."""
     cfg = load_config()
-    raw = cfg.get("vault_path", DEFAULT_WEB_CLIPS)
+    raw = cfg.get("vault_path")
+    if not raw:
+        return None
     return Path(raw).expanduser().resolve()
+
+
+def get_daily_dir():
+    """Return the daily notes directory, inferred or explicit."""
+    cfg = load_config()
+    raw = cfg.get("daily_path")
+    if raw:
+        return Path(raw).expanduser().resolve()
+
+    # Infer from vault_path: if bookmarks are at .../003_Resources/Bookmarks,
+    # assume daily notes at .../002_Journal/daily/
+    vp = cfg.get("vault_path")
+    if not vp:
+        return None
+    vp = Path(vp).expanduser().resolve()
+    if vp.name == "Bookmarks" and vp.parent.name == "003_Resources":
+        inferred = vp.parent.parent / "002_Journal" / "daily"
+        if inferred.exists():
+            return inferred
+    return None
 
 
 # ── API ───────────────────────────────────────────────────────────────────
@@ -78,7 +103,7 @@ class KarakeepAPI:
         return {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
-            "User-Agent": "kk-cli/0.3",
+            "User-Agent": "kk-cli/0.4",
         }
 
     def _req(self, method, path, data=None, params=None):
@@ -133,7 +158,6 @@ def die(msg):
 
 
 def prompt(msg, default=None):
-    """Ask the user a question and return the answer."""
     suffix = f" [{default}]" if default else ""
     try:
         return input(f"{msg}{suffix}: ").strip()
@@ -194,6 +218,7 @@ def parse_frontmatter(text):
 
 
 def bm_to_note_content(bm):
+    """Convert a Karakeep bookmark into an Obsidian note. No personal tags or conventions."""
     ctype = bm.get("content", {}).get("type", "link")
     content = bm.get("content", {})
     bm_id = bm["id"]
@@ -214,7 +239,6 @@ def bm_to_note_content(bm):
         "author": author or "",
         "publisher": publisher or "",
         "tags": tags,
-        "status": "#status/0-new",
     }
 
     lines = ["---"]
@@ -246,11 +270,8 @@ def bm_to_note_content(bm):
         lines.append("")
 
     lines.append("---")
-    lines.append("tags: ")
-    lines.append("status: #status/0-new")
     lines.append("")
-    lines.append("---")
-    lines.append("See also: [[003_Resources/Bookmarks/_Index|Bookmarks]]")
+    lines.append("See also: [[_Index|Bookmarks]]")
 
     return "\n".join(lines)
 
@@ -269,27 +290,72 @@ def note_filename(bm):
 
 
 def note_filepath_from_bm(bm):
-    return get_web_clips_dir() / note_filename(bm)
+    vault = get_vault_dir()
+    if not vault:
+        return None
+    return vault / note_filename(bm)
 
 
-def _append_to_daily_note(count):
-    """Append a sync summary line to today's daily note."""
-    daily_dir = Path.home() / "obsidian" / "personal-vault" / "002_Journal" / "daily"
+def ensure_index_note(vault_dir):
+    """Create _Index.md if it doesn't exist."""
+    idx = vault_dir / "_Index.md"
+    if idx.exists():
+        return
+    folder_name = vault_dir.name
+    idx.write_text(f"""---
+created: {datetime.now().strftime('%Y-%m-%d')}
+source: karakeep
+tags: [bookmarks, index]
+---
+
+# Bookmarks Index
+
+Bookmarks synced from Karakeep.
+
+---
+
+## Recently Added
+
+```dataview
+TABLE summary as "Summary", tags as "Tags", created as "Saved"
+FROM "{folder_name}"
+WHERE source = "karakeep"
+SORT created desc
+LIMIT 20
+```
+
+## By Tag
+
+```dataview
+TABLE rows.file.link as "Bookmarks"
+FROM "{folder_name}"
+WHERE source = "karakeep" AND tags
+FLATTEN tags as tag
+GROUP BY tag
+SORT tag asc
+```
+""")
+
+
+def append_daily_note(count, vault_dir):
+    """Append sync summary to today's daily note if daily_dir resolves."""
+    daily_dir = get_daily_dir()
+    if not daily_dir:
+        return  # silently skip — daily notes not configured
     today = datetime.now().strftime("%Y-%m-%d")
     daily_path = daily_dir / f"{today}.md"
-
     try:
         daily_dir.mkdir(parents=True, exist_ok=True)
+        line = f"- Synced [[{vault_dir.name}/_Index|{count} bookmark{'s' if count != 1 else ''}]] from Karakeep"
         if daily_path.exists():
             text = daily_path.read_text()
-            # Don't duplicate if already there
-            if f"Synced {count} bookmarks" in text:
+            if line in text:
                 return
-            daily_path.write_text(text.rstrip() + f"\n- Synced [[003_Resources/Bookmarks/_Index|{count} bookmark{'s' if count != 1 else ''}]] from Karakeep\n")
+            daily_path.write_text(text.rstrip() + f"\n{line}\n")
         else:
-            daily_path.write_text(f"---\ncreated_at: {today}\ndate: {today}\ntags: personal/daily/log\n---\n\n## Bookmarks\n- Synced [[003_Resources/Bookmarks/_Index|{count} bookmark{'s' if count != 1 else ''}]] from Karakeep\n")
+            daily_path.write_text(f"---\ncreated_at: {today}\ndate: {today}\ntags: daily\n---\n\n{line}\n")
     except Exception as e:
-        print(f"  (note: couldn't update daily log — {e})")
+        print(f"  (daily note skipped: {e})")
 
 
 # ── Commands ──────────────────────────────────────────────────────────────
@@ -298,39 +364,50 @@ def cmd_login(args):
     cfg = load_config()
     cfg["url"] = args.url
     cfg["api_key"] = args.api_key
-
-    # Vault path: flag takes priority, then interactive if not set
-    vault_set = False
-    if args.vault is not None:
-        cfg["vault_path"] = str(Path(args.vault).expanduser().resolve())
-        vault_set = True
-
     save_config(cfg)
 
-    # Verify connection
     try:
         KarakeepAPI().list_bookmarks(limit=1)
         print(f"✓ Connected to {args.url}")
-        print(f"  Config saved to {CONFIG_FILE}")
     except Exception as e:
         die(f"Connection failed: {e}")
 
-    # Onboarding: ask about Obsidian sync
-    if not vault_set:
-        print()
-        ans = prompt("Set up Obsidian vault sync?", default="y/N").lower()
-        if ans in ("y", "yes"):
-            default_path = cfg.get("vault_path", DEFAULT_WEB_CLIPS)
-            p = prompt(f"  Web Clips directory path", default=default_path)
-            if p:
-                cfg["vault_path"] = str(Path(p).expanduser().resolve())
+    # Optional vault setup
+    print()
+    ans = prompt("Configure Obsidian vault sync? (optional)", default="y/N").lower()
+    if ans in ("y", "yes"):
+        default_path = cfg.get("vault_path", "")
+        p = prompt("  Path to bookmarks directory", default=default_path)
+        if p:
+            cfg["vault_path"] = str(Path(p).expanduser().resolve())
+            save_config(cfg)
+            print(f"  ✓ Bookmarks directory set to {cfg['vault_path']}")
+
+            dp = prompt("  Path to daily notes (optional, for sync cross-refs)", default="(skip)")
+            if dp and dp != "(skip)":
+                cfg["daily_path"] = str(Path(dp).expanduser().resolve())
                 save_config(cfg)
-                print(f"  ✓ Vault path set to {cfg['vault_path']}")
+                print(f"  ✓ Daily notes path set")
 
             ans2 = prompt("  Run initial sync now?", default="Y/n").lower()
             if ans2 in ("", "y", "yes"):
                 print()
                 cmd_sync(None)
+    else:
+        print("  (skip — can configure later with: kk config --set vault_path=/path/to/bookmarks)")
+
+
+def cmd_logout(args):
+    """Wipe config and state."""
+    confirm = prompt("This will remove all saved configuration and sync state. Continue?", default="y/N")
+    if confirm.lower() not in ("y", "yes"):
+        print("Aborted.")
+        return
+    for fp in [CONFIG_FILE, STATE_FILE]:
+        if fp.exists():
+            fp.unlink()
+            print(f"  removed {fp}")
+    print("✓ Logged out")
 
 
 def cmd_list(args):
@@ -419,16 +496,21 @@ def cmd_delete(args):
 
 
 def cmd_sync(args):
+    """Pull new bookmarks from Karakeep → Obsidian vault (if configured)."""
+    vault_dir = get_vault_dir()
+    if not vault_dir:
+        die("vault_path not configured. Set one up:\n  kk config --set vault_path=/path/to/bookmarks\n  kk sync")
+
     api = KarakeepAPI()
     state = load_state()
-    clips_dir = get_web_clips_dir()
-    clips_dir.mkdir(parents=True, exist_ok=True)
+    vault_dir.mkdir(parents=True, exist_ok=True)
+    ensure_index_note(vault_dir)
 
     last_cursor = state.get("last_sync_cursor")
     new_count = 0
     skipped_count = 0
 
-    print(f"Syncing bookmarks to {clips_dir} ...")
+    print(f"Syncing bookmarks to {vault_dir} ...")
 
     cursor = None
     done = False
@@ -448,21 +530,21 @@ def cmd_sync(args):
                 break
 
             fp = note_filepath_from_bm(bm)
-            if fp.exists():
+            if fp and fp.exists():
                 try:
-                    existing = fp.read_text()
-                    if f"karakeep_id: {bm_id}" in existing:
+                    if f"karakeep_id: {bm_id}" in fp.read_text():
                         skipped_count += 1
                         continue
                 except:
                     pass
 
             content = bm_to_note_content(bm)
-            fp.parent.mkdir(parents=True, exist_ok=True)
-            fp.write_text(content)
-            new_count += 1
-            title = bm.get("content", {}).get("title") or bm.get("content", {}).get("text", "") or "untitled"
-            print(f"  + {title[:60]}")
+            if fp:
+                fp.parent.mkdir(parents=True, exist_ok=True)
+                fp.write_text(content)
+                new_count += 1
+                title = bm.get("content", {}).get("title") or bm.get("content", {}).get("text", "") or "untitled"
+                print(f"  + {title[:60]}")
 
         if done or not next_cursor:
             break
@@ -477,7 +559,7 @@ def cmd_sync(args):
     print()
     if new_count:
         print(f"✓ {new_count} new bookmarks synced")
-        _append_to_daily_note(new_count)
+        append_daily_note(new_count, vault_dir)
     else:
         print("✓ No new bookmarks to sync")
     if skipped_count:
@@ -485,21 +567,26 @@ def cmd_sync(args):
 
 
 def cmd_push(args):
+    """Push vault note changes back to Karakeep (if vault is configured)."""
+    vault_dir = get_vault_dir()
+    if not vault_dir:
+        die("vault_path not configured. Set one up:\n  kk config --set vault_path=/path/to/bookmarks")
+
+    if not vault_dir.exists():
+        die(f"Directory not found: {vault_dir}\n  Run kk sync first.")
+
     api = KarakeepAPI()
     state = load_state()
-    clips_dir = get_web_clips_dir()
     updated_count = 0
     error_count = 0
 
-    print(f"Scanning {clips_dir} for notes to push to Karakeep...")
+    print(f"Scanning {vault_dir} for notes to push to Karakeep...")
 
-    if not clips_dir.exists():
-        die(f"Directory not found: {clips_dir}\n  Run kk sync first.")
-
-    for fp in sorted(clips_dir.glob("*.md"), key=lambda p: p.stat().st_mtime, reverse=True):
+    for fp in sorted(vault_dir.glob("*.md"), key=lambda p: p.stat().st_mtime, reverse=True):
+        if fp.name == "_Index.md":
+            continue
         text = fp.read_text()
         fm = parse_frontmatter(text)
-
         bm_id = fm.get("karakeep_id")
         if not bm_id:
             continue
@@ -512,15 +599,11 @@ def cmd_push(args):
 
         try:
             bm = api.get_bookmark(bm_id)
-            current_note = bm.get("note") or ""
-
-            if vault_note == current_note:
+            if vault_note == (bm.get("note") or ""):
                 continue
-
             api.update_bookmark(bm_id, {"note": vault_note})
             print(f"  ↑ {fm.get('source_url', fm.get('created', '?'))[:70]}")
             updated_count += 1
-
         except SystemExit:
             error_count += 1
             print(f"  ✗ failed: {bm_id[:12]}...")
@@ -543,7 +626,6 @@ def cmd_push(args):
 def cmd_config(args):
     cfg = load_config()
 
-    # Handle --set key=val
     if args.set:
         for pair in args.set:
             if "=" not in pair:
@@ -552,7 +634,8 @@ def cmd_config(args):
             key, _, val = pair.partition("=")
             cfg[key.strip()] = val.strip()
         save_config(cfg)
-        print(f"✓ Config updated ({len(args.set)} change(s))")
+        changes = len(args.set)
+        print(f"✓ Config updated ({changes} change{'s' if changes != 1 else ''})")
         return
 
     if not cfg:
@@ -569,23 +652,44 @@ def cmd_config(args):
         print(f"\nlast_sync_at: {state['last_sync_at']}")
     if state.get("last_push_at"):
         print(f"last_push_at: {state['last_push_at']}")
-    print(f"\nweb_clips_dir: {get_web_clips_dir()}")
+
+    vd = get_vault_dir()
+    print(f"\nvault_dir: {vd or '(not configured — CRUD commands work without it)'}")
+    dd = get_daily_dir()
+    print(f"daily_dir: {dd or '(not configured)'}")
 
 
 # ── Main ──────────────────────────────────────────────────────────────────
 
+VERSION = "0.4.0"
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="kk",
-        description="Karakeep CLI — full CRUD + bidirectional Obsidian sync",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=DESCRIPTION,
+        epilog=(
+            "Examples:\n"
+            "  kk login https://hoarder.example.com ak2_my_key\n"
+            "  kk list --limit 5\n"
+            "  kk add https://example.com/article\n"
+            "  kk config --set vault_path=~/my-vault/Bookmarks\n"
+            "  kk sync\n"
+            "\nFull docs: https://github.com/ShaggyD/AGENT_SKILLS\n"
+        ),
     )
+    parser.add_argument("--version", action="version", version=f"kk {VERSION}")
+
     sub = parser.add_subparsers(dest="command", required=True)
 
     # login
-    p = sub.add_parser("login", help="Configure connection to a Karakeep instance")
+    p = sub.add_parser("login", help="Connect to a Karakeep instance (vault sync is optional)")
     p.add_argument("url", help="Instance URL (e.g. https://hoarder.example.com)")
     p.add_argument("api_key", help="API key from Settings → API Keys")
-    p.add_argument("--vault", help="Path to Obsidian Web Clips directory (skips interactive prompt)")
+
+    # logout
+    sub.add_parser("logout", help="Wipe saved config and state")
 
     # list
     p = sub.add_parser("list", help="List recent bookmarks")
@@ -596,7 +700,7 @@ def main():
     p.add_argument("id", help="Bookmark ID")
 
     # add
-    p = sub.add_parser("add", help="Save a URL link bookmark")
+    p = sub.add_parser("add", help="Save a URL bookmark")
     p.add_argument("url", help="URL to save")
 
     # text
@@ -634,20 +738,20 @@ def main():
     p.add_argument("id", help="Bookmark ID")
 
     # sync
-    p = sub.add_parser("sync", help="Pull new bookmarks from Karakeep → Obsidian vault")
-
+    p = sub.add_parser("sync", help="Pull new bookmarks into the Obsidian vault (requires vault_path)")
     # push
-    p = sub.add_parser("push", help="Push vault note changes → Karakeep bookmarks")
+    p = sub.add_parser("push", help="Push vault note changes to Karakeep (requires vault_path)")
 
     # config
     p = sub.add_parser("config", help="Show or update configuration")
     p.add_argument("--set", metavar="key=val", nargs="+",
-                   help="Set config values (e.g. --set vault_path=/path/to/clips)")
+                   help="Set config values (e.g. --set vault_path=/path/to/bookmarks)")
 
     args = parser.parse_args()
 
     commands = {
         "login": cmd_login,
+        "logout": cmd_logout,
         "list": cmd_list,
         "get": cmd_get,
         "add": cmd_add,

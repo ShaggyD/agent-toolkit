@@ -1,26 +1,29 @@
 ---
 name: karakeep-obsidian-sync
-description: Full CRUD CLI for Karakeep + bidirectional sync to any Obsidian vault
-version: 1.1.0
-author: Capricorn
+description: Full CRUD CLI for Karakeep — standalone bookmarking tool with optional Obsidian vault sync
+version: 0.4.0
+author: Dustin Chadwick
 metadata:
   hermes:
-    tags: [karakeep, obsidian, bookmarking, sync, cli]
+    tags: [karakeep, obsidian, bookmarking, sync, cli, crud]
 ---
 
 # Karakeep ↔ Obsidian Sync
 
-Full CRUD CLI tool (`kk`) for managing a self-hosted Karakeep instance with bidirectional sync to an Obsidian vault. The vault path is configurable — works for any vault, not just the author's.
+A CLI tool for [Karakeep](https://github.com/karakeep-app/karakeep) (self-hosted bookmarking). All CRUD commands work standalone — Obsidian vault sync is an optional add-on.
+
+**Author:** Dustin "Dusty" Chadwick ([@ShaggyD](https://github.com/ShaggyD))
 
 ## CLI Tool: `kk`
 
-Installed at `~/.local/bin/kk`. Minimal dependencies (stdlib only: `urllib`, `json`, `argparse`, `re`, `pathlib`).
+Single-file Python script — zero external dependencies.
 
 ### Commands
 
 | Command | Description |
 |---------|-------------|
-| `kk login <url> <key> [--vault PATH]` | Configure connection + optional vault setup |
+| `kk login <url> <key>` | Connect to a Karakeep instance |
+| `kk logout` | Wipe saved config and state |
 | `kk list [--limit N]` | List recent bookmarks |
 | `kk get <id>` | View bookmark as JSON |
 | `kk add <url>` | Save a URL bookmark |
@@ -30,36 +33,75 @@ Installed at `~/.local/bin/kk`. Minimal dependencies (stdlib only: `urllib`, `js
 | `kk tag <id> <tag>...` | Attach tags |
 | `kk untag <id> <tag>...` | Detach tags |
 | `kk delete <id>` | Delete a bookmark |
-| `kk sync` | Pull new bookmarks → Obsidian vault |
-| `kk push` | Push vault note changes → Karakeep |
+| `kk sync` | Pull new bookmarks → Obsidian vault (if configured) |
+| `kk push` | Push vault note changes → Karakeep (if configured) |
 | `kk config [--set key=val]` | Show or update configuration |
 
-## Onboarding Flow
+None of the CRUD commands (`list`, `get`, `add`, `text`, `note`, `edit`, `tag`, `untag`, `delete`) require a vault. Sync and push only work if `vault_path` is configured.
 
-On first run (`kk login`), after verifying the API connection, the tool asks:
+## Quick Start (standalone — no vault needed)
 
+```bash
+# Install
+cp kk ~/.local/bin/ && chmod +x ~/.local/bin/kk
+
+# Connect
+kk login https://hoarder.example.com ak2_your_api_key_here
+
+# Use
+kk list
+kk add https://example.com/article
+kk note <id> "My thoughts on this"
 ```
-Set up Obsidian vault sync? [y/N]:
-  Web Clips directory path [~/obsidian/personal-vault/003_Resources/Bookmarks]:
-  Run initial sync now? [Y/n]:
+
+## Optional: Obsidian Vault Sync
+
+After login (or later), configure vault sync:
+
+```bash
+kk config --set vault_path=~/my-vault/003_Resources/Bookmarks
+kk config --set daily_path=~/my-vault/002_Journal/daily   # optional
+kk sync   # initial pull
 ```
 
-If `--vault PATH` is passed to `login`, the interactive prompt is skipped entirely — useful for scripting or headless setup.
+The `login` command also offers an interactive vault setup prompt.
 
-The vault path can also be changed later with `kk config --set vault_path=/new/path`.
+### What sync does
 
-## Configuration
+- Creates a `_Index.md` in your bookmark directory with Dataview-powered Recently Added and By Tag tables
+- Each bookmark becomes a `.md` file with frontmatter (source, URL, tags, author)
+- Backlinks point to `[[_Index|Bookmarks]]` (relative — works from any folder)
+- Optional: appends a cross-reference to today's daily note if `daily_path` is configured
 
-- **Config file:** `~/.config/kk/config.json`
-- **State file:** `~/.config/kk/state.json` (sync cursor + push/update timestamps)
-- **Key fields in config:**
-  - `url` — Karakeep instance URL
-  - `api_key` — API token
-  - `vault_path` — Path to Obsidian Bookmarks directory (default: `~/obsidian/personal-vault/003_Resources/Bookmarks`)
+### What push does
+
+Scans your vault for edited `## Notes` sections and pushes changes back to the bookmark's note field in Karakeep.
+
+### Configuration
+
+```json
+{
+  "url": "https://hoarder.example.com",
+  "api_key": "ak2_...",
+  "vault_path": "~/my-vault/003_Resources/Bookmarks",
+  "daily_path": "~/my-vault/002_Journal/daily"
+}
+```
+
+- `vault_path` — where synced bookmarks go as `.md` files (sync/push only)
+- `daily_path` — optional, for daily note cross-references. Inferred from `vault_path` if it follows `003_Resources/Bookmarks` → `002_Journal/daily` structure.
+
+Config and sync state stored at `~/.config/kk/{config,state}.json`.
+
+### Automation (cron)
+
+```cron
+0 8 * * * /home/user/.local/bin/kk sync
+```
+
+No push cron by default — editing notes in your vault should be intentional.
 
 ## Note Format
-
-Each synced bookmark becomes an `.md` file in the Bookmarks directory with YAML frontmatter:
 
 ```yaml
 ---
@@ -70,50 +112,18 @@ source_url: <original-url>
 author: <author>
 publisher: <publisher>
 tags: [tag1, tag2]
-status: #status/0-new
 ---
 ```
 
-- **link** → AI summary + URL + editable `## Notes` section
-- **text** → full content body
-- **asset** → file reference
+No personal tags or conventions are baked in. Notes link back to `[[_Index|Bookmarks]]` which works from any vault folder structure.
 
-### Index Note
+## Known Pitfalls
 
-Each sync creates/maintains an index dashboard at `003_Resources/Bookmarks/_Index.md` with Dataview-powered tables for **Recently Added** and **By Tag** views.
-
-### Daily Note Cross-Reference
-
-When `kk sync` finds new bookmarks, it appends a line to today's daily note (`002_Journal/daily/YYYY-MM-DD.md`):
-
-```
-- Synced [[003_Resources/Bookmarks/_Index|3 bookmarks]] from Karakeep
-```
-
-### Backlinks
-
-Each synced note links back to the index: `[[003_Resources/Bookmarks/_Index|Bookmarks]]`
-
-Editing the `## Notes` section of a synced file and running `kk push` sends changes back to the bookmark's `note` field in Karakeep.
-
-## Filename Convention
-
-`YYYY-MM-DD-slugified-title.md`
-
-## Automation
-
-A daily cron job runs `kk sync` at 8 AM via Hermes Agent. Push is manual-only for safety.
-
-## API Reference
-
-See `references/karakeep-api.md` for the full endpoint reference, authentication details, and known quirks discovered through real-world use (User-Agent block, tag format, 204 handling).
-
-## Pitfalls
-
-- **User-Agent block:** Karakeep blocks Python's default `urllib` UA string. The tool sets `User-Agent: kk-cli/0.3`.
-- **Empty DELETE responses:** API returns 204 No Content — tool handles empty body gracefully.
-- **Full IDs required:** Always use full bookmark IDs (displayed by `kk list`). Truncated IDs return 404.
-- **Tag format:** Tags use `{"tagName": "..."}` objects. The tool handles this internally.
-- **Clearing a note:** `kk note <id> ""` clears a bookmark's note field.
-- **API key stored in plaintext** at `~/.config/kk/config.json` — treat the config file as sensitive.
-- **Filename collisions:** Bookmarks without a title or content map to `unknown-untitled.md` and may collide.
+- **API key in plaintext** — stored at `~/.config/kk/config.json`. Recommended: `chmod 600 ~/.config/kk/config.json`
+- **User-Agent block** — Karakeep blocks Python's default `urllib` UA. The tool sets `User-Agent: kk-cli/0.4`
+- **Full IDs required** — use full bookmark IDs from `kk list`. Truncated IDs return 404
+- **Tag format** — the API expects `{"tagName": "..."}` objects, not strings. Handled internally
+- **Clearing a note:** `kk note <id> ""` clears a bookmark's note field
+- **Filename collisions** — bookmarks without a title/content map to `unknown-untitled.md`
+- **Python 3.7+ required** (for `pathlib` and `datetime.fromisoformat`)
+- **Empty DELETE responses** — API returns 204 No Content. Tool handles empty body gracefully

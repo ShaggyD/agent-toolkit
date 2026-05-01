@@ -4,12 +4,14 @@ A collection of reusable AI agent skills — portable Markdown documents that gi
 
 Skills are provider-agnostic by design. Export them from one agent platform and import into another without rewriting.
 
+**Author:** Dustin "Dusty" Chadwick ([@ShaggyD](https://github.com/ShaggyD))
+
 ## Skills
 
 | Skill | Description |
 |-------|-------------|
 | [agent-constitution-setup](productivity/agent-constitution-setup/) | Build three essential docs for AI agent context: personal constitution, goals, and business strategy. Framework by [Allie Miller](https://www.youtube.com/watch?v=YfRkj9kmQf0). |
-| [karakeep-obsidian-sync](productivity/karakeep-obsidian-sync/) | Full CRUD CLI for Karakeep (self-hosted bookmarking) with bidirectional sync to an Obsidian vault. By [Dustin Chadwick](https://github.com/ShaggyD). |
+| [karakeep-obsidian-sync](productivity/karakeep-obsidian-sync/) | Full CRUD CLI for Karakeep (self-hosted bookmarking). All commands standalone — Obsidian vault sync is optional. By [Dustin Chadwick](https://github.com/ShaggyD). |
 
 ## What Makes a Good Skill?
 
