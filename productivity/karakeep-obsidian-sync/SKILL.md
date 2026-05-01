@@ -40,7 +40,7 @@ On first run (`kk login`), after verifying the API connection, the tool asks:
 
 ```
 Set up Obsidian vault sync? [y/N]:
-  Web Clips directory path [~/obsidian/personal-vault/Web Clips]:
+  Web Clips directory path [~/obsidian/personal-vault/003_Resources/Bookmarks]:
   Run initial sync now? [Y/n]:
 ```
 
@@ -55,11 +55,11 @@ The vault path can also be changed later with `kk config --set vault_path=/new/p
 - **Key fields in config:**
   - `url` — Karakeep instance URL
   - `api_key` — API token
-  - `vault_path` — Path to Obsidian Web Clips directory (default: `~/obsidian/personal-vault/Web Clips`)
+  - `vault_path` — Path to Obsidian Bookmarks directory (default: `~/obsidian/personal-vault/003_Resources/Bookmarks`)
 
 ## Note Format
 
-Each synced bookmark becomes an `.md` file with YAML frontmatter:
+Each synced bookmark becomes an `.md` file in the Bookmarks directory with YAML frontmatter:
 
 ```yaml
 ---
@@ -77,6 +77,22 @@ status: #status/0-new
 - **link** → AI summary + URL + editable `## Notes` section
 - **text** → full content body
 - **asset** → file reference
+
+### Index Note
+
+Each sync creates/maintains an index dashboard at `003_Resources/Bookmarks/_Index.md` with Dataview-powered tables for **Recently Added** and **By Tag** views.
+
+### Daily Note Cross-Reference
+
+When `kk sync` finds new bookmarks, it appends a line to today's daily note (`002_Journal/daily/YYYY-MM-DD.md`):
+
+```
+- Synced [[003_Resources/Bookmarks/_Index|3 bookmarks]] from Karakeep
+```
+
+### Backlinks
+
+Each synced note links back to the index: `[[003_Resources/Bookmarks/_Index|Bookmarks]]`
 
 Editing the `## Notes` section of a synced file and running `kk push` sends changes back to the bookmark's `note` field in Karakeep.
 

@@ -250,7 +250,7 @@ def bm_to_note_content(bm):
     lines.append("status: #status/0-new")
     lines.append("")
     lines.append("---")
-    lines.append("See also: [[Web Clips]]")
+    lines.append("See also: [[003_Resources/Bookmarks/_Index|Bookmarks]]")
 
     return "\n".join(lines)
 
@@ -270,6 +270,26 @@ def note_filename(bm):
 
 def note_filepath_from_bm(bm):
     return get_web_clips_dir() / note_filename(bm)
+
+
+def _append_to_daily_note(count):
+    """Append a sync summary line to today's daily note."""
+    daily_dir = Path.home() / "obsidian" / "personal-vault" / "002_Journal" / "daily"
+    today = datetime.now().strftime("%Y-%m-%d")
+    daily_path = daily_dir / f"{today}.md"
+
+    try:
+        daily_dir.mkdir(parents=True, exist_ok=True)
+        if daily_path.exists():
+            text = daily_path.read_text()
+            # Don't duplicate if already there
+            if f"Synced {count} bookmarks" in text:
+                return
+            daily_path.write_text(text.rstrip() + f"\n- Synced [[003_Resources/Bookmarks/_Index|{count} bookmark{'s' if count != 1 else ''}]] from Karakeep\n")
+        else:
+            daily_path.write_text(f"---\ncreated_at: {today}\ndate: {today}\ntags: personal/daily/log\n---\n\n## Bookmarks\n- Synced [[003_Resources/Bookmarks/_Index|{count} bookmark{'s' if count != 1 else ''}]] from Karakeep\n")
+    except Exception as e:
+        print(f"  (note: couldn't update daily log — {e})")
 
 
 # ── Commands ──────────────────────────────────────────────────────────────
@@ -457,6 +477,7 @@ def cmd_sync(args):
     print()
     if new_count:
         print(f"✓ {new_count} new bookmarks synced")
+        _append_to_daily_note(new_count)
     else:
         print("✓ No new bookmarks to sync")
     if skipped_count:
