@@ -341,7 +341,7 @@ def append_daily_note(count, vault_dir):
     """Append sync summary to today's daily note if daily_dir resolves."""
     daily_dir = get_daily_dir()
     if not daily_dir:
-        return  # silently skip — daily notes not configured
+        return
     today = datetime.now().strftime("%Y-%m-%d")
     daily_path = daily_dir / f"{today}.md"
     try:
@@ -356,6 +356,130 @@ def append_daily_note(count, vault_dir):
             daily_path.write_text(f"---\ncreated_at: {today}\ndate: {today}\ntags: daily\n---\n\n{line}\n")
     except Exception as e:
         print(f"  (daily note skipped: {e})")
+
+
+# ── Enrichment ────────────────────────────────────────────────────────────
+
+YOUTUBE_DOMAINS = {"youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be", "www.youtu.be"}
+
+
+def _extract_youtube_id(url):
+    """Extract YouTube video ID from various URL formats."""
+    import urllib.parse
+    parsed = urllib.parse.urlparse(url)
+    if parsed.netloc in YOUTUBE_DOMAINS:
+        if parsed.path == "/watch":
+            qs = urllib.parse.parse_qs(parsed.query)
+            return qs.get("v", [None])[0]
+        elif parsed.path.startswith("/embed/"):
+            return parsed.path.split("/")[2]
+        elif parsed.path.startswith("/v/"):
+            return parsed.path.split("/")[2]
+        elif parsed.netloc in ("youtu.be", "www.youtu.be"):
+            return parsed.path.lstrip("/").split("?")[0]
+    return None
+
+
+def _enrich_youtube(video_id):
+    """Fetch YouTube transcript via youtube-transcript-api (uses uv)."""
+    import subprocess, textwrap
+    code = textwrap.dedent(f'''
+    from youtube_transcript_api import YouTubeTranscriptApi
+    api = YouTubeTranscriptApi()
+    t = api.fetch("{video_id}")
+    full = " ".join(s.text for s in t.snippets)
+    print(f"LANGUAGE:{{t.language}}")
+    print(f"SNIPPETS:{{len(t.snippets)}}")
+    print(f"CHARS:{{len(full)}}")
+    print(full, end="")
+    ''')
+    try:
+        result = subprocess.run(
+            ["uv", "run", "--with", "youtube-transcript-api", "python3", "-c", code],
+            capture_output=True, text=True, timeout=60
+        )
+        if result.returncode != 0:
+            return None, f"uv failed: {result.stderr.strip()[:200]}"
+        out = result.stdout.strip()
+        # Parse metadata from the output
+        lines = out.split("\n")
+        meta = {}
+        content_lines = []
+        for line in lines:
+            if line.startswith("LANGUAGE:"):
+                meta["language"] = line[9:]
+            elif line.startswith("SNIPPETS:"):
+                meta["snippets"] = int(line[9:])
+            elif line.startswith("CHARS:"):
+                meta["chars"] = int(line[6:])
+            else:
+                content_lines.append(line)
+        return "\n".join(content_lines).strip(), meta
+    except FileNotFoundError:
+        return None, "uv not found — install with: curl -LsSf https://astral.sh/uv/install.sh | sh"
+    except subprocess.TimeoutExpired:
+        return None, "transcript fetch timed out (60s)"
+    except Exception as e:
+        return None, str(e)
+
+
+def _enrich_article(url):
+    """Fetch page content and extract readable text via curl + basic HTML stripping."""
+    import subprocess, re, html as htmlmod
+    try:
+        result = subprocess.run(
+            ["curl", "-sL", "--max-time", "15", url],
+            capture_output=True, text=True, timeout=20
+        )
+        if result.returncode != 0:
+            return None, f"curl failed: {result.stderr.strip()[:200]}"
+        raw = result.stdout
+        # Try to find <main>, <article>, or body content
+        for tag in ("<main", "<article", '<div class="content"', '<div id="content"', '<div class="post"'):
+            idx = raw.lower().find(tag)
+            if idx >= 0:
+                raw = raw[idx:]
+                break
+        # Strip tags
+        text = re.sub(r'<script[^>]*>.*?</script>', '', raw, flags=re.DOTALL)
+        text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL)
+        text = re.sub(r'<[^>]+>', '\n', text)
+        text = htmlmod.unescape(text)
+        lines = [l.strip() for l in text.split('\n') if len(l.strip()) > 40]
+        if not lines:
+            return None, "no meaningful content extracted"
+        return "\n\n".join(lines[:100]), {"lines": len(lines), "chars": sum(len(l) for l in lines)}
+    except FileNotFoundError:
+        return None, "curl not found"
+    except subprocess.TimeoutExpired:
+        return None, "fetch timed out (20s)"
+    except Exception as e:
+        return None, str(e)
+
+
+def enrich_bookmark(bm):
+    """Try to enrich a bookmark with additional content. Returns (section_title, content, metadata)."""
+    ctype = bm.get("content", {}).get("type", "link")
+    if ctype != "link":
+        return None, None, None
+    
+    url = bm.get("content", {}).get("url", "")
+    if not url:
+        return None, None, None
+
+    # YouTube
+    vid = _extract_youtube_id(url)
+    if vid:
+        text, meta = _enrich_youtube(vid)
+        if text:
+            return "## Transcript", text, meta
+        return None, None, None  # silently skip failed enrichment
+
+    # Other articles — best effort
+    text, meta = _enrich_article(url)
+    if text:
+        return "## Extracted Content", text, meta
+    return None, None, None
 
 
 # ── Commands ──────────────────────────────────────────────────────────────
@@ -501,6 +625,8 @@ def cmd_sync(args):
     if not vault_dir:
         die("vault_path not configured. Set one up:\n  kk config --set vault_path=/path/to/bookmarks\n  kk sync")
 
+    do_enrich = args is not None and getattr(args, "enrich", False)
+
     api = KarakeepAPI()
     state = load_state()
     vault_dir.mkdir(parents=True, exist_ok=True)
@@ -509,6 +635,8 @@ def cmd_sync(args):
     last_cursor = state.get("last_sync_cursor")
     new_count = 0
     skipped_count = 0
+    enrich_count = 0
+    enrich_errors = 0
 
     print(f"Syncing bookmarks to {vault_dir} ...")
 
@@ -539,12 +667,24 @@ def cmd_sync(args):
                     pass
 
             content = bm_to_note_content(bm)
+            section = None
+
+            # Enrich if requested
+            if do_enrich:
+                section, extra, meta = enrich_bookmark(bm)
+                if section and extra:
+                    content += f"\n\n{section}\n\n{extra}\n"
+                    enrich_count += 1
+                elif meta:
+                    enrich_errors += 1
+
             if fp:
                 fp.parent.mkdir(parents=True, exist_ok=True)
                 fp.write_text(content)
                 new_count += 1
                 title = bm.get("content", {}).get("title") or bm.get("content", {}).get("text", "") or "untitled"
-                print(f"  + {title[:60]}")
+                enrich_tag = " 📜" if do_enrich and section else ""
+                print(f"  + {title[:60]}{enrich_tag}")
 
         if done or not next_cursor:
             break
@@ -559,6 +699,10 @@ def cmd_sync(args):
     print()
     if new_count:
         print(f"✓ {new_count} new bookmarks synced")
+        if enrich_count:
+            print(f"  ({enrich_count} enriched with transcripts/content)")
+        if enrich_errors:
+            print(f"  ({enrich_errors} enrichment attempts failed)")
         append_daily_note(new_count, vault_dir)
     else:
         print("✓ No new bookmarks to sync")
@@ -623,6 +767,29 @@ def cmd_push(args):
         print("(no notes with changes to push)")
 
 
+def cmd_enrich(args):
+    """Enrich a single bookmark with transcript or extracted content."""
+    api = KarakeepAPI()
+    bm = api.get_bookmark(args.id)
+    title = bm.get("content", {}).get("title") or bm.get("content", {}).get("text", "") or "untitled"
+    print(f"Enriching: {title[:60]}...")
+
+    section, extra, meta = enrich_bookmark(bm)
+    if section and extra:
+        print(f"\n{section}\n")
+        if meta:
+            details = ", ".join(f"{k}={v}" for k, v in meta.items())
+            print(f"[{details}]")
+        print()
+        # Show first 500 chars
+        print(extra[:500])
+        if len(extra) > 500:
+            print(f"... ({len(extra)} total chars)")
+    else:
+        reason = meta or "unsupported bookmark type or no URL"
+        print(f"Could not enrich: {reason}")
+
+
 def cmd_config(args):
     cfg = load_config()
 
@@ -661,7 +828,7 @@ def cmd_config(args):
 
 # ── Main ──────────────────────────────────────────────────────────────────
 
-VERSION = "0.4.0"
+VERSION = "0.5.0"
 
 
 def main():
@@ -739,8 +906,14 @@ def main():
 
     # sync
     p = sub.add_parser("sync", help="Pull new bookmarks into the Obsidian vault (requires vault_path)")
+    p.add_argument("--enrich", action="store_true", help="Fetch YouTube transcripts / article content for new bookmarks")
+
     # push
     p = sub.add_parser("push", help="Push vault note changes to Karakeep (requires vault_path)")
+
+    # enrich
+    p = sub.add_parser("enrich", help="Fetch transcript or content for a single bookmark")
+    p.add_argument("id", help="Bookmark ID")
 
     # config
     p = sub.add_parser("config", help="Show or update configuration")
@@ -763,6 +936,7 @@ def main():
         "delete": cmd_delete,
         "sync": cmd_sync,
         "push": cmd_push,
+        "enrich": cmd_enrich,
         "config": cmd_config,
     }
 

@@ -93,6 +93,11 @@ Scans your vault for edited `## Notes` sections and pushes changes back to the b
 
 Config and sync state stored at `~/.config/kk/{config,state}.json`.
 
+### Vault path inference design
+
+When `daily_path` is not explicitly set, the tool infers it from `vault_path`
+using a PARA-structure heuristic. See `references/vault-path-inference.md`.
+
 ### Automation (cron)
 
 ```cron
