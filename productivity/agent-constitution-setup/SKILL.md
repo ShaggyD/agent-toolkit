@@ -1,8 +1,8 @@
 ---
 name: agent-constitution-setup
 description: "Build three essential docs for AI agent context: personal constitution, goals, and business strategy. Based on Allie Miller's framework."
-version: 1.0.0
-author: Dusty + Capricorn
+version: 1.1.0
+author: Dustin Chadwick
 license: MIT
 metadata:
   hermes:
@@ -14,6 +14,8 @@ metadata:
 # Agent Constitution Setup
 
 Build three documents that give AI agents deep context about who you are, where you're going, and what you're building. Framework developed by AI advisor Allie Miller: without these files, every AI interaction starts from a blank slate. With them, the agent operates from your actual context.
+
+**Author:** Dustin "Dusty" Chadwick ([@ShaggyD](https://github.com/ShaggyD))
 
 ## The Three Files
 
@@ -28,7 +30,7 @@ Build three documents that give AI agents deep context about who you are, where 
 - Include both strengths AND acknowledged weaknesses. A constitution that only flatters is useless.
 - Iterate: draft, ask what doesn't sit right, rewrite. The user should feel slightly exposed — that's how you know it's real.
 
-**Format:** Plain markdown, one heading. Saved to `~/.hermes/references/constitution.md`.
+**Format:** Plain markdown, one heading. Save wherever your agent can access it (e.g. agent context, project files, a dedicated references directory).
 
 ### 2. Goals Document (time-bound)
 **What it is:** Annual/quarterly/monthly goals, habits to build, habits to kick, specific inputs/outputs to manage.
@@ -40,7 +42,7 @@ Build three documents that give AI agents deep context about who you are, where 
 - Focus on feelings first ("by December I want to feel like I finally ____"), then translate to specifics.
 - Keep it lean. If it's longer than a screen, it won't get used.
 
-**Format:** Plain markdown with sections. Saved to `~/.hermes/references/goals-YYYY.md`.
+**Format:** Plain markdown with sections. Filename includes the year (e.g. `goals-2026.md`).
 
 ### 3. Core Business Strategy (contextual)
 **What it is:** What your business is, who you serve, who you don't serve, value proposition, and — critically — the things NOT on your website or LinkedIn. The failed podcast, the org that retreats to safety, the patterns that explain decisions.
@@ -52,16 +54,34 @@ Build three documents that give AI agents deep context about who you are, where 
 - Ask directly: "What's something true about this that you'd never put on a public slide deck?" That answer IS the strategy doc.
 - Capture constraints, not just aspirations. Real strategy lives in the friction.
 
-**Format:** Plain markdown with sections. Saved to `~/.hermes/references/business-strategy.md`.
+**Format:** Plain markdown with sections.
 
-## Integration with Hermes
+## Using These Documents
 
-After building all three docs:
+After building all three docs, integrate them into your agent's context:
 
-1. **Condense the constitution** into 3-5 bullet points and save to memory so it's injected into every turn.
-2. **Reference the files** from memory: `Reference docs: ~/.hermes/references/constitution.md, ... Load these for context when planning, prioritizing, or making recommendations.`
-3. **Consolidate user profile** — merge fragmented onboarding entries into denser blocks. The goal is <85% memory capacity with all three docs referenced.
-4. **Load the docs explicitly** during planning sessions, weekly reviews, or any task where alignment matters.
+1. **Store them where your agent can read them** — project files, a knowledge base, a dedicated references directory, clipboard, or custom instructions.
+2. **Reference them explicitly** — tell your agent where to find them and when to load them (e.g. "Load these when planning, prioritizing, or making recommendations").
+3. **Condense the constitution** into a short summary your agent always has — core values, decision-making style, communication preferences. Keep the full doc for detailed reference.
+4. **Write an agent service standard** — the agent's equivalent of a goals doc. Defines what "good" looks like: escalation boundaries, proactivity ceiling, output quality bar, noise discipline. See `references/agent-service-standards.md` for a framework.
+5. **Iterate** — these are living documents. Return to them quarterly and refine.
+
+> **Hermes Agent users:** See `references/hermes-integration.md` for platform-specific steps (memory consolidation, `.hermes/references/` setup, GitHub publishing).
+
+## Templates
+
+This skill ships with two kinds of templates:
+
+| File | Description |
+|------|-------------|
+| `references/example-dusty-constitution.md` | **Real example** from Dustin Chadwick's personal constitution |
+| `references/example-dusty-goals.md` | **Real example** from Dustin Chadwick's 2026 goals |
+| `references/example-dusty-strategy.md` | **Real example** from Dustin Chadwick's business strategy |
+| `templates/generic-constitution.md` | Placeholder template — replace with your own content |
+| `templates/generic-goals.md` | Placeholder template — replace with your own content |
+| `templates/generic-strategy.md` | Placeholder template — replace with your own content |
+
+The real examples illustrate what the final output looks like. Start with the generic templates and replace the bracketed text.
 
 ## Interviewing Tips
 
@@ -72,10 +92,11 @@ After building all three docs:
 
 ## Pitfalls
 
-- **Don't over-consolidate memory.** Cramming everything into one 1,300-char entry creates a wall of text the model skims. Concise bullets with file pointers work better.
-- **Don't interview like a form.** If the user gives you a personality test result, use it. Cross-reference traits against what you've observed.
 - **Constitutions are NOT goals.** If an entry could reasonably change next year, it belongs in the goals doc, not the constitution.
+- **Don't interview like a form.** If the user gives you a personality test result, use it. Cross-reference traits against what you've observed.
 - **The third doc hurts.** If the business strategy doc is just marketing copy, you didn't go deep enough. The real strategy is what you'd tell a trusted advisor, not a customer.
+- **Memory/context budget is finite.** A wall of text gets skimmed. Keep constitution values condensed into a short summary, with the full doc available for deep reference.
+- **Files are portable.** Store them in a way that survives agent resets. Project files, a git repo, or a synced directory are better than ephemeral chat context.
 
 ## Attribution
 

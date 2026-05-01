@@ -1,3 +1,5 @@
+> **Real example from Dustin Chadwick.** This is his actual personal constitution, included to show what the final output looks like. Replace with your own content.
+
 # Dusty's Personal Constitution
 
 *I am a builder of possibilities, not a maintainer of systems. I ship at 80% and refine in motion — momentum beats polish. But I know my own pattern: the last 20% can linger. I close loops. Completion is a discipline I actively practice, because a dozen almost-done things is not momentum, it's drag.*
