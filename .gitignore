@@ -7,3 +7,5 @@
 productivity/*
 !productivity/agent-constitution-setup/
 !productivity/agent-constitution-setup/**
+!productivity/karakeep-obsidian-sync/
+!productivity/karakeep-obsidian-sync/**
