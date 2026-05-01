@@ -1,7 +1,7 @@
 ---
 name: karakeep-obsidian-sync
 description: Full CRUD CLI for Karakeep — standalone bookmarking tool with optional Obsidian vault sync
-version: 0.4.0
+version: 0.5.0
 author: Dustin Chadwick
 metadata:
   hermes:
@@ -33,8 +33,9 @@ Single-file Python script — zero external dependencies.
 | `kk tag <id> <tag>...` | Attach tags |
 | `kk untag <id> <tag>...` | Detach tags |
 | `kk delete <id>` | Delete a bookmark |
-| `kk sync` | Pull new bookmarks → Obsidian vault (if configured) |
+| `kk sync [--enrich]` | Pull new bookmarks → vault; use --enrich for transcripts/content |
 | `kk push` | Push vault note changes → Karakeep (if configured) |
+| `kk enrich <id>` | Fetch YouTube transcript or article content for a single bookmark |
 | `kk config [--set key=val]` | Show or update configuration |
 
 None of the CRUD commands (`list`, `get`, `add`, `text`, `note`, `edit`, `tag`, `untag`, `delete`) require a vault. Sync and push only work if `vault_path` is configured.
@@ -77,7 +78,24 @@ The `login` command also offers an interactive vault setup prompt.
 
 Scans your vault for edited `## Notes` sections and pushes changes back to the bookmark's note field in Karakeep.
 
-### Configuration
+### Enrichment
+
+Bookmarks can be enriched with additional content before saving to the vault:
+
+| Type | Enrichment | How |
+|------|-----------|-----|
+| YouTube links | Full transcript (25K+ chars) | `youtube-transcript-api` via `uv run --with` |
+| Article links | Readable text extraction | `curl` + Python's built-in `html.parser` |
+
+**Commands:**
+- `kk enrich <id>` — enrich a single bookmark and preview the result
+- `kk sync --enrich` — sync new bookmarks and auto-enrich each one
+
+Enrichment is best-effort. If fetching fails, the note is still saved with Karakeep's existing content.
+
+The cron default is `kk sync` without `--enrich` because enrichment adds latency (transcript fetching, page downloads). Run with `--enrich` periodically or when you want deep content in new bookmarks.
+
+### Vault path inference design
 
 ```json
 {
@@ -89,9 +107,26 @@ Scans your vault for edited `## Notes` sections and pushes changes back to the b
 ```
 
 - `vault_path` — where synced bookmarks go as `.md` files (sync/push only)
-- `daily_path` — optional, for daily note cross-references. Inferred from `vault_path` if it follows `003_Resources/Bookmarks` → `002_Journal/daily` structure.
+### What push does
 
-Config and sync state stored at `~/.config/kk/{config,state}.json`.
+Scans your vault for edited `## Notes` sections and pushes changes back to the bookmark's note field in Karakeep.
+
+### Enrichment
+
+Bookmarks can be enriched with additional content before saving to the vault:
+
+| Type | Enrichment | How |
+|------|-----------|-----|
+| YouTube links | Full transcript (25K+ chars) | `youtube-transcript-api` via `uv run --with` |
+| Article links | Readable text extraction | `curl` + Python's built-in `html.parser` |
+
+**Commands:**
+- `kk enrich <id>` — enrich a single bookmark and preview the result
+- `kk sync --enrich` — sync new bookmarks and auto-enrich each one
+
+Enrichment is best-effort. If fetching fails, the note is still saved with Karakeep's existing content.
+
+The cron default is `kk sync` without `--enrich` because enrichment adds latency (transcript fetching, page downloads). Run with `--enrich` periodically or when you want deep content in new bookmarks.
 
 ### Vault path inference design
 
@@ -125,7 +160,7 @@ No personal tags or conventions are baked in. Notes link back to `[[_Index|Bookm
 ## Known Pitfalls
 
 - **API key in plaintext** — stored at `~/.config/kk/config.json`. Recommended: `chmod 600 ~/.config/kk/config.json`
-- **User-Agent block** — Karakeep blocks Python's default `urllib` UA. The tool sets `User-Agent: kk-cli/0.4`
+- **User-Agent block** — Karakeep blocks Python's default `urllib` UA. The tool sets `User-Agent: kk-cli/0.5`
 - **Full IDs required** — use full bookmark IDs from `kk list`. Truncated IDs return 404
 - **Tag format** — the API expects `{"tagName": "..."}` objects, not strings. Handled internally
 - **Clearing a note:** `kk note <id> ""` clears a bookmark's note field

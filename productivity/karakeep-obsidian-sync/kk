@@ -768,8 +768,87 @@ def cmd_push(args):
 
 
 def cmd_enrich(args):
-    """Enrich a single bookmark with transcript or extracted content."""
+    """Enrich a bookmark with transcript or extracted content."""
     api = KarakeepAPI()
+
+    # Validate: need either an id, --next, or --list
+    if not args.id and not args.next and not args.list:
+        die("Specify a bookmark ID, or use --next or --list")
+
+    # --next mode: find the newest YouTube bookmark not yet enriched
+    if args.next:
+        vault_dir = get_vault_dir()
+        if not vault_dir:
+            die("vault_path not configured.")
+        candidates = []
+        for fp in sorted(vault_dir.glob("*.md"), reverse=True):
+            text = fp.read_text()
+            fm = parse_frontmatter(text)
+            url = fm.get("source_url", "")
+            if not url:
+                continue
+            url_lower = url.lower()
+            if "youtube.com" not in url_lower and "youtu.be" not in url_lower:
+                continue
+            if "## Transcript" in text:
+                continue
+            bm_id = fm.get("karakeep_id")
+            if bm_id:
+                candidates.append((fp, bm_id, url))
+        if not candidates:
+            print("✓ All YouTube bookmarks are already enriched!")
+            return
+        fp, bm_id, url = candidates[0]
+        bm = api.get_bookmark(bm_id)
+        title = bm.get("content", {}).get("title") or fp.stem[:60]
+        print(f"Enriching ({len(candidates)} remaining): {title[:60]}...")
+        section, extra, meta = enrich_bookmark(bm)
+        if section and extra:
+            current = fp.read_text()
+            fp.write_text(current.rstrip() + f"\n\n{section}\n\n{extra}\n")
+            details = ", ".join(f"{k}={v}" for k, v in (meta or {}).items())
+            print(f"✓ {details}")
+        else:
+            reason = meta or "failed to fetch"
+            print(f"  skipped: {reason}")
+        return
+
+    # --list mode: show enrichment queue
+    if args.list:
+        vault_dir = get_vault_dir()
+        if not vault_dir:
+            die("vault_path not configured.")
+        total = 0
+        enriched = 0
+        remaining = []
+        for fp in sorted(vault_dir.glob("*.md"), reverse=True):
+            text = fp.read_text()
+            fm = parse_frontmatter(text)
+            url = fm.get("source_url", "")
+            if not url:
+                continue
+            url_lower = url.lower()
+            if "youtube.com" not in url_lower and "youtu.be" not in url_lower:
+                continue
+            total += 1
+            if "## Transcript" in text:
+                enriched += 1
+            else:
+                title_match = re.search(r'^# (.+)$', text, re.MULTILINE)
+                title = title_match.group(1).strip()[:60] if title_match else fp.stem[:60]
+                remaining.append(f"  {fp.stem[:10]} {title}")
+        print(f"YouTube bookmarks: {total}")
+        print(f"Enriched: {enriched}")
+        print(f"Remaining: {total - enriched}")
+        if remaining:
+            print("\nQueue (newest first):")
+            for r in remaining[:10]:
+                print(r)
+            if len(remaining) > 10:
+                print(f"  ... and {len(remaining) - 10} more")
+        return
+
+    # Default: enrich a specific bookmark by ID
     bm = api.get_bookmark(args.id)
     title = bm.get("content", {}).get("title") or bm.get("content", {}).get("text", "") or "untitled"
     print(f"Enriching: {title[:60]}...")
@@ -781,7 +860,6 @@ def cmd_enrich(args):
             details = ", ".join(f"{k}={v}" for k, v in meta.items())
             print(f"[{details}]")
         print()
-        # Show first 500 chars
         print(extra[:500])
         if len(extra) > 500:
             print(f"... ({len(extra)} total chars)")
@@ -912,8 +990,10 @@ def main():
     p = sub.add_parser("push", help="Push vault note changes to Karakeep (requires vault_path)")
 
     # enrich
-    p = sub.add_parser("enrich", help="Fetch transcript or content for a single bookmark")
-    p.add_argument("id", help="Bookmark ID")
+    p = sub.add_parser("enrich", help="Fetch transcript or content for a bookmark")
+    p.add_argument("id", nargs="?", default=None, help="Bookmark ID (omit with --next or --list)")
+    p.add_argument("--next", action="store_true", help="Enrich the next un-enriched YouTube bookmark (newest first)")
+    p.add_argument("--list", action="store_true", help="Show YouTube enrichment queue")
 
     # config
     p = sub.add_parser("config", help="Show or update configuration")
