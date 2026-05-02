@@ -9,3 +9,5 @@ productivity/*
 !productivity/agent-constitution-setup/**
 !productivity/karakeep-obsidian-sync/
 !productivity/karakeep-obsidian-sync/**
+!productivity/file-size-gatekeeper/
+!productivity/file-size-gatekeeper/**

@@ -11,7 +11,8 @@ Skills are provider-agnostic by design. Export them from one agent platform and 
 | Skill | Description |
 |-------|-------------|
 | [agent-constitution-setup](productivity/agent-constitution-setup/) | Build three essential docs for AI agent context: personal constitution, goals, and business strategy. Framework by [Allie Miller](https://www.youtube.com/watch?v=YfRkj9kmQf0). |
-| [karakeep-obsidian-sync](productivity/karakeep-obsidian-sync/) | Full CRUD CLI for Karakeep (self-hosted bookmarking). All commands standalone — Obsidian vault sync is optional. By [Dustin Chadwick](https://github.com/ShaggyD). |
+|| [karakeep-obsidian-sync](productivity/karakeep-obsidian-sync/) | Full CRUD CLI for Karakeep (self-hosted bookmarking). All commands standalone — Obsidian vault sync is optional. By [Dustin Chadwick](https://github.com/ShaggyD). |
+|| [file-size-gatekeeper](productivity/file-size-gatekeeper/) | Prevent silent context-window pressure and the "18,000 character trap" by enforcing file size discipline. Inspired by [Andrew's OpenClaw Blueprint](https://youtu.be/5ec5mh41oig) (Video 2 of 8). |
 
 ## What Makes a Good Skill?
 
