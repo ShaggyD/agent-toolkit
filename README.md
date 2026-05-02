@@ -128,21 +128,6 @@ For non-Hermes agents, read the `SKILL.md` file directly and feed it as system c
 
 ---
 
-## What Makes a Good Skill?
-
-A skill folder typically contains:
-
-| File / Directory | Purpose |
-|---|---|
-| `SKILL.md` | Core instructions (trigger conditions, step-by-step workflow, pitfalls) |
-| `templates/` | Example files the agent can learn from or the user can copy |
-| `references/` | Supporting docs the agent can pull in as needed |
-| `scripts/` | Helper scripts the agent can execute |
-
-Skills accumulate over time. Each one represents something the agent learned, solved, or got corrected on — turned into a repeatable procedure.
-
----
-
 ## License
 
 MIT — use freely, adapt openly, attribute where meaningful.
