@@ -139,7 +139,7 @@ This skill was refactored from a personal tool to a distributable one. Key lesso
 - **Relative backlinks.** `[[_Index|Bookmarks]]` works from any vault folder — no hardcoded paths.
 - **No personal conventions.** Status tags, PARA structure assumptions, and author-specific frontmatter fields are excluded from generated content.
 - **Graceful degradation.** If uv or curl are missing, enrichment silently skips rather than crashing. The note still gets created.
-- **Best-effort enrichment.** YouTube transcripts via uv (tool installed on-the-fly, no permanent dependency). Article text via curl + stdlib HTML parsing. Failures don't block the sync.
+- **Best-effort enrichment.** YouTube transcripts via uv (tool installed on-the-fly, no permanent dependency — see `references/uv-adhoc-deps.md`). Article text via curl + stdlib HTML parsing. Failures don't block the sync.
 
 ## Known Pitfalls
 
