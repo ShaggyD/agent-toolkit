@@ -92,6 +92,38 @@ The skill includes an on-demand audit command, a condensing workflow, and an opt
 
 ---
 
+## Development / SDLC Skills
+
+### SDLC Core Pipeline (ported)
+
+These seven skills are adapted from Addy Osmani's [agent-skills](https://github.com/addyosmani/agent-skills) project (MIT), described in his [Agent Skills](https://addyosmani.com/blog/agent-skills/) blog post, and organized with an ordered `sdlc-<n>-` prefix.
+
+**Default policy:** Use **SDLC 1–6 as required phases when those skills exist in the environment**. Treat **SDLC 7 as optional**, based on release/deployment scope.
+
+| Step | Skill | Purpose |
+|---|---|---|
+| 1 | [sdlc-1-spec-driven-development](development/sdlc-1-spec-driven-development/) | Define objective, assumptions, success criteria, and boundaries before coding |
+| 2 | [sdlc-2-planning-and-task-breakdown](development/sdlc-2-planning-and-task-breakdown/) | Convert specs into dependency-aware plans and actionable tasks |
+| 3 | [sdlc-3-incremental-implementation](development/sdlc-3-incremental-implementation/) | Build in thin, testable vertical slices |
+| 4 | [sdlc-4-test-driven-development](development/sdlc-4-test-driven-development/) | Prove behavior with Red-Green-Refactor and reproduction-first bug fixes |
+| 5 | [sdlc-5-code-review-and-quality](development/sdlc-5-code-review-and-quality/) | Apply five-axis review gates before merge |
+| 6 | [sdlc-6-code-simplification](development/sdlc-6-code-simplification/) | Reduce complexity without behavior changes |
+| 7 (Optional) | [sdlc-7-shipping-and-launch](development/sdlc-7-shipping-and-launch/) | Launch safely with rollout, monitoring, and rollback discipline |
+
+Each SDLC skill includes:
+- `SKILL.md` — the workflow
+- `README.md` — usage notes, prerequisites, and attribution
+
+### Shared References (imported)
+
+The SDLC skills use shared checklists imported into [references/](references/):
+- [security-checklist.md](references/security-checklist.md)
+- [performance-checklist.md](references/performance-checklist.md)
+- [accessibility-checklist.md](references/accessibility-checklist.md)
+- [testing-patterns.md](references/testing-patterns.md)
+
+---
+
 ## Repository Structure
 
 ```
@@ -99,10 +131,23 @@ AGENT_SKILLS/
 ├── README.md                    ← you are here
 ├── LICENSE                      ← MIT
 ├── .gitignore                   ← allowlist pattern (track only published skills)
-└── productivity/
-    ├── agent-constitution-setup/   ← skill 1
-    ├── karakeep-obsidian-sync/     ← skill 2
-    └── file-size-gatekeeper/       ← skill 3
+├── productivity/
+│   ├── agent-constitution-setup/
+│   ├── karakeep-obsidian-sync/
+│   └── file-size-gatekeeper/
+├── development/
+│   ├── sdlc-1-spec-driven-development/
+│   ├── sdlc-2-planning-and-task-breakdown/
+│   ├── sdlc-3-incremental-implementation/
+│   ├── sdlc-4-test-driven-development/
+│   ├── sdlc-5-code-review-and-quality/
+│   ├── sdlc-6-code-simplification/
+│   └── sdlc-7-shipping-and-launch/
+└── references/
+    ├── security-checklist.md
+    ├── performance-checklist.md
+    ├── accessibility-checklist.md
+    └── testing-patterns.md
 ```
 
 **Why the `.gitignore` uses an allowlist:** The repository root doubles as a Hermes Agent skills directory. Hermes's built-in skills from the [Skills Hub](https://agentskills.io) are present on disk but are not part of this repo. Only explicitly published skills are tracked in git.
@@ -135,6 +180,8 @@ MIT — use freely, adapt openly, attribute where meaningful.
 **Attribution notes:**
 - [agent-constitution-setup](productivity/agent-constitution-setup/) builds on [Allie Miller's framework](https://www.youtube.com/watch?v=YfRkj9kmQf0)
 - [file-size-gatekeeper](productivity/file-size-gatekeeper/) is inspired by [Andrew's OpenClaw Blueprint Series](https://youtu.be/5ec5mh41oig)
+- [development/sdlc-*](development/) skills are inspired by [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT) and [Agent Skills](https://addyosmani.com/blog/agent-skills/), then modified to match Dustin Chadwick's personal engineering principles for depth, review discipline, and execution preferences
+- [references/*](references/) checklists are imported from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT)
 
 ---
 
