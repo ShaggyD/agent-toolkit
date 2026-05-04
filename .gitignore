@@ -1,6 +1,7 @@
 # Only track explicitly added skills
 *
 !.gitignore
+!AGENTS.md
 !README.md
 !LICENSE
 !productivity/
@@ -11,3 +12,21 @@ productivity/*
 !productivity/karakeep-obsidian-sync/**
 !productivity/file-size-gatekeeper/
 !productivity/file-size-gatekeeper/**
+!development/
+development/*
+!development/sdlc-1-spec-driven-development/
+!development/sdlc-1-spec-driven-development/**
+!development/sdlc-2-planning-and-task-breakdown/
+!development/sdlc-2-planning-and-task-breakdown/**
+!development/sdlc-3-incremental-implementation/
+!development/sdlc-3-incremental-implementation/**
+!development/sdlc-4-test-driven-development/
+!development/sdlc-4-test-driven-development/**
+!development/sdlc-5-code-review-and-quality/
+!development/sdlc-5-code-review-and-quality/**
+!development/sdlc-6-code-simplification/
+!development/sdlc-6-code-simplification/**
+!development/sdlc-7-shipping-and-launch/
+!development/sdlc-7-shipping-and-launch/**
+!references/
+!references/**
