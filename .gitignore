@@ -12,6 +12,10 @@ productivity/*
 !productivity/karakeep-obsidian-sync/**
 !productivity/file-size-gatekeeper/
 !productivity/file-size-gatekeeper/**
+!productivity/macos-task-scheduler/
+!productivity/macos-task-scheduler/**
+!productivity/opencode-analyzer/
+!productivity/opencode-analyzer/**
 !development/
 development/*
 !development/sdlc-1-spec-driven-development/

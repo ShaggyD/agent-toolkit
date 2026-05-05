@@ -64,6 +64,30 @@ Synced bookmarks land in your Obsidian vault at `003_Resources/Bookmarks/` with 
 
 ---
 
+### [macos-task-scheduler](productivity/macos-task-scheduler/)
+
+Schedule recurring tasks on macOS using launchd plists. Covers configuration, scheduling syntax, and task lifecycle.
+
+| | |
+|---|---|
+| **Author** | Dustin Chadwick ([@ShaggyD](https://github.com/ShaggyD)) |
+| **Category** | Productivity / Automation |
+| **Files** | 1 (SKILL.md) |
+
+---
+
+### [opencode-analyzer](productivity/opencode-analyzer/)
+
+OpenCode cost analyzer with detailed daily/weekly/monthly breakdowns. Shows actual spending vs OpenRouter equivalents, plus same-token model comparisons.
+
+| | |
+|---|---|
+| **Author** | Dustin Chadwick ([@ShaggyD](https://github.com/ShaggyD)) |
+| **Category** | Productivity / Analysis |
+| **Files** | 4 (SKILL.md + binary CLI + plugins/README.md) |
+
+---
+
 ### [file-size-gatekeeper](productivity/file-size-gatekeeper/)
 
 Prevent the "18,000 character trap" — silent context-window degradation caused by bloated skill files, config, and reference docs.
@@ -134,7 +158,9 @@ AGENT_SKILLS/
 ├── productivity/
 │   ├── agent-constitution-setup/
 │   ├── karakeep-obsidian-sync/
-│   └── file-size-gatekeeper/
+│   ├── file-size-gatekeeper/
+│   ├── macos-task-scheduler/
+│   └── opencode-analyzer/
 ├── development/
 │   ├── sdlc-1-spec-driven-development/
 │   ├── sdlc-2-planning-and-task-breakdown/
@@ -180,6 +206,8 @@ MIT — use freely, adapt openly, attribute where meaningful.
 **Attribution notes:**
 - [agent-constitution-setup](productivity/agent-constitution-setup/) builds on [Allie Miller's framework](https://www.youtube.com/watch?v=YfRkj9kmQf0)
 - [file-size-gatekeeper](productivity/file-size-gatekeeper/) is inspired by [Andrew's OpenClaw Blueprint Series](https://youtu.be/5ec5mh41oig)
+- [macos-task-scheduler](productivity/macos-task-scheduler/)
+- [opencode-analyzer](productivity/opencode-analyzer/) is developed from the [AGENTIC_SKILLS](https://github.com/ShaggyD/AGENTIC_SKILLS) repository
 - [development/sdlc-*](development/) skills are inspired by [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT) and [Agent Skills](https://addyosmani.com/blog/agent-skills/), then modified to match Dustin Chadwick's personal engineering principles for depth, review discipline, and execution preferences
 - [references/*](references/) checklists are imported from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT)
 
