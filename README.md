@@ -116,6 +116,27 @@ The skill includes an on-demand audit command, a condensing workflow, and an opt
 
 ---
 
+## Autonomous AI Agent Skills
+
+### [pi-agent](autonomous-ai-agents/pi-agent/)
+
+Run Pi coding-agent workflows through RPC with persistent, resumable sessions and Hermes-native stateful control patterns.
+
+| | |
+|---|---|
+| **Author** | Hermes Agent |
+| **Category** | Autonomous AI Agents / RPC Orchestration |
+| **Files** | 5 (SKILL.md + 3 reference docs + 1 script) |
+
+**What’s inside:**
+- `SKILL.md` — operational workflow and action surface for stateful Pi RPC control
+- `references/hermes-stateful-tool-integration.md` — Hermes tool wiring, lifecycle patterns, restart semantics
+- `references/pi-rpc-auth-and-extension-troubleshooting.md` — auth + startup troubleshooting playbook
+- `references/rpc-pitfalls.md` — common failure modes and fast triage
+- `scripts/pi_rpc_client.py` — minimal CLI RPC helper script
+
+---
+
 ## Development / SDLC Skills
 
 ### SDLC Core Pipeline (ported)
@@ -169,6 +190,8 @@ AGENT_SKILLS/
 │   ├── sdlc-5-code-review-and-quality/
 │   ├── sdlc-6-code-simplification/
 │   └── sdlc-7-shipping-and-launch/
+├── autonomous-ai-agents/
+│   └── pi-agent/
 └── references/
     ├── security-checklist.md
     ├── performance-checklist.md
@@ -208,6 +231,7 @@ MIT — use freely, adapt openly, attribute where meaningful.
 - [file-size-gatekeeper](productivity/file-size-gatekeeper/) is inspired by [Andrew's OpenClaw Blueprint Series](https://youtu.be/5ec5mh41oig)
 - [macos-task-scheduler](productivity/macos-task-scheduler/)
 - [opencode-analyzer](productivity/opencode-analyzer/) is developed from the [AGENTIC_SKILLS](https://github.com/ShaggyD/AGENTIC_SKILLS) repository
+- [autonomous-ai-agents/pi-agent](autonomous-ai-agents/pi-agent/) documents Pi RPC orchestration patterns and Hermes-native stateful tool workflows
 - [development/sdlc-*](development/) skills are inspired by [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT) and [Agent Skills](https://addyosmani.com/blog/agent-skills/), then modified to match Dustin Chadwick's personal engineering principles for depth, review discipline, and execution preferences
 - [references/*](references/) checklists are imported from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT)
 
