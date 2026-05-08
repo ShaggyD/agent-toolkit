@@ -1,4 +1,4 @@
-# Pi RPC auth + startup troubleshooting
+# Pi Auth + Extension Troubleshooting
 
 ## 1) Symptom: prompt fails with missing API key
 

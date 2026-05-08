@@ -10,9 +10,9 @@ metadata:
     related_skills: [opencode, codex, hermes-agent]
 ---
 
-# Pi RPC Mode
+# Pi Agent — RPC Session Orchestrator
 
-Use `pi --mode rpc` when you need a long-lived, bidirectional coding agent process with durable session continuity and machine-readable events.
+Use `pi --mode rpc` via the native Hermes **`pi_agent`** tool (🤖) when you need a long-lived, bidirectional coding agent process with durable session continuity and machine-readable events.
 
 ## When to use
 
@@ -77,7 +77,7 @@ Use `turn_end` or `agent_end` as completion boundaries for a prompt cycle.
 
 ## Hermes integration patterns
 
-### A) Native Hermes `pi_rpc` tool (preferred)
+### A) Native Hermes `pi_agent` tool (preferred)
 
 Use the built-in stateful tool when available:
 
@@ -124,28 +124,36 @@ Use the built-in stateful tool when available:
 {"action":"stop","session_id":"<SESSION_ID>"}
 ```
 
-#### Typical loop (5 lines)
+#### Typical loop (5 lines → 6 for complex prompts)
 
 ```text
 1) {"action":"start","workdir":"/path/to/repo"}
 2) {"action":"send","session_id":"<SESSION_ID>","message":"...","request_id":"req-1"}
-3) {"action":"wait","session_id":"<SESSION_ID>","request_id":"req-1","until_event":"turn_end","timeout_seconds":90}
+3) {"action":"wait","session_id":"<SESSION_ID>","request_id":"req-1","until_event":"turn_end","timeout_seconds":180}
 4) {"action":"poll","session_id":"<SESSION_ID>","limit":200}
 5) {"action":"stop","session_id":"<SESSION_ID>"}
 ```
 
+**For complex prompts** (multi-turn research, file reading, test running): `wait()` returns massive streaming delta data (400K–800K+ chars) that gets truncated. The clean text response is in the session JSONL file — see `references/response-extraction.md` for how to extract it. Add a 6th step: extract from session file after `turn_end`.
+
+```text
+1) start → 2) send → 3) wait (until turn_end) → 4) extract text from session file → 5) poll (to sync) → 6) stop
+```
+
+Simple prompts (one-shot code gen) resolve in 15–30s and the text is available directly in `wait()` output.
+
 ### B) Process-tool fallback
 
-If native `pi_rpc` is unavailable, run pi in a Hermes background process and interact with `process`:
+If native `pi_agent` is unavailable, run pi in a Hermes background process and interact with `process`:
 
 1. Start: `terminal(..., background=true, pty=false)`
 2. Send JSON: `process(action="submit", data='{"type":"prompt",...}')`
 3. Poll/log: `process(action="poll"|"log")`
 4. Stop: `process(action="kill")`
 
-## Hermes `pi_rpc` runtime behavior (important)
+## `pi_agent` tool runtime behavior (important)
 
-- Session metadata persists at `~/.hermes/state/pi_rpc_sessions.json`.
+- Session metadata persists at `~/.hermes/state/pi_agent_sessions.json`.
 - After Hermes process restart, previously known sessions are restored as **detached** metadata entries.
 - Detached sessions are listable for continuity context, but **not writable** (`send` will fail) because stdio handles cannot be reattached safely.
 - Use `action: resume` on a detached session to spawn a new live RPC process:
@@ -205,15 +213,19 @@ Using `{"prompt": ...}` can fail with provider/runtime errors.
    - This disables persistence and breaks restart continuity.
 5. **Launching in the wrong repository**
    - RPC inherits current working directory. Start pi from the target project root (or set `cwd` in your wrapper), otherwise branch/diff analysis is against the wrong repo.
-6. **Auth looks like transport failure**
+6. **`wait()` returns massive output for multi-turn prompts**
+   - When pi runs 5–12 tool-calling turns (reading files, running tests, git analysis), the `wait()` response bundles all streaming deltas — think fragments, partial tool calls, text — into one 400K–800K+ char blob. This gets truncated in tool output.
+   - **Fix:** Increase `timeout_seconds` to 180+ for research prompts. Extract the clean final text from the session JSONL file instead of parsing `wait()` output (see `references/response-extraction.md`).
+7. **Auth looks like transport failure**
    - If prompt calls fail with `No API key found for unknown`, RPC is healthy but provider auth is missing. Fix auth first (`OPENCODE_API_KEY` or `pi /login`) before debugging your wrapper.
 
 See `references/rpc-pitfalls.md` for concrete error transcripts and fast triage checks.
 
 ## References
 
-- `references/pi-rpc-auth-and-extension-troubleshooting.md` — common auth and extension startup failures, plus deterministic fixes.
-- `references/hermes-stateful-tool-integration.md` — native Hermes `pi_rpc` tool wiring (`start/send/poll/wait/stop/list`), registry verification, persistence file, and restart gotchas (detached sessions).
+- `references/auth-and-extension-troubleshooting.md` — common auth and extension startup failures, plus deterministic fixes.
+- `references/response-extraction.md` — extracting pi's final text response from the session JSONL file when `wait()` returns truncated streaming delta data.
+- `references/hermes-stateful-tool-integration.md` — native Hermes `pi_agent` tool wiring (`start/send/poll/wait/stop/list`), registry verification, persistence file, and restart gotchas (detached sessions).
 
 ## Verification checklist
 

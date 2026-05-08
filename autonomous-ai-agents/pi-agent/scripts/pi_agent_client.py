@@ -2,9 +2,9 @@
 """Minimal pi RPC client for durable multi-turn sessions.
 
 Usage examples:
-  python pi_rpc_client.py --self-check
-  python pi_rpc_client.py --workdir ~/code/my-project --prompt "Audit this repo"
-  python pi_rpc_client.py --session /path/to/session.jsonl --workdir ~/code/my-project --prompt "Continue"
+  python pi_agent_client.py --self-check
+  python pi_agent_client.py --workdir ~/code/my-project --prompt "Audit this repo"
+  python pi_agent_client.py --session /path/to/session.jsonl --workdir ~/code/my-project --prompt "Continue"
 """
 
 from __future__ import annotations
@@ -50,7 +50,6 @@ class PiRpcClient:
             try:
                 self._q.put(json.loads(line))
             except json.JSONDecodeError:
-                # Ignore non-JSON noise safely
                 continue
 
     def send(self, payload: Dict[str, Any]) -> None:
@@ -59,7 +58,6 @@ class PiRpcClient:
         self.proc.stdin.flush()
 
     def recv_until_response(self, command: str, timeout_s: float = 60.0) -> Dict[str, Any]:
-        """Collect events until response for a given command arrives."""
         import time
 
         deadline = time.time() + timeout_s

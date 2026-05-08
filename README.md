@@ -126,14 +126,17 @@ Run Pi coding-agent workflows through RPC with persistent, resumable sessions an
 |---|---|
 | **Author** | Dustin Chadwick ([@ShaggyD](https://github.com/ShaggyD)) |
 | **Category** | Autonomous AI Agents / RPC Orchestration |
-| **Files** | 5 (SKILL.md + 3 reference docs + 1 script) |
+| **Files** | 9 (SKILL.md + 4 reference docs + 1 script + 2 tool files + 1 test) |
 
-**What’s inside:**
+**What's inside:**
 - `SKILL.md` — operational workflow and action surface for stateful Pi RPC control
 - `references/hermes-stateful-tool-integration.md` — Hermes tool wiring, lifecycle patterns, restart semantics
-- `references/pi-rpc-auth-and-extension-troubleshooting.md` — auth + startup troubleshooting playbook
+- `references/auth-and-extension-troubleshooting.md` — auth + startup troubleshooting playbook
+- `references/response-extraction.md` — extracting text responses from RPC turn events
 - `references/rpc-pitfalls.md` — common failure modes and fast triage
-- `scripts/pi_rpc_client.py` — minimal CLI RPC helper script
+- `scripts/pi_agent_client.py` — minimal CLI RPC helper script
+- `tools/pi_agent_tool.py` — Hermes-native `pi_agent` tool (🤖) for stateful Pi RPC sessions
+- `tools/test_pi_agent_tool.py` — pytest suite for the tool
 
 ---
 
