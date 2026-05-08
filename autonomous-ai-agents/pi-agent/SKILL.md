@@ -203,7 +203,19 @@ Using `{"prompt": ...}` can fail with provider/runtime errors.
 
 ## Pitfalls
 
-1. **Mixing logs and JSON on stdout**
+1. **Don't confuse poll() noise with slow model speed**
+   - When you `poll()` while a turn is in progress, you'll see character-level `thinking_delta` events and tool stdout streaming — this is **intermediate streaming events**, not the agent typing slowly. The agent finishes fast; you're just reading raw event fragments.
+   - **Correct assessment approach**: `send()` the prompt, then `wait(until_event='turn_end')` to block for completion, then `poll()` for the final result. The time between `send` and `turn_end` is the true wall-clock time — not what the character deltas suggest.
+   - **`poll()` during an active turn** shows every `message_update` (thinking fragment by fragment), `tool_execution_update` (stdout line by line). These make the agent look glacially slow when it's actually running at normal speed.
+   - If you need a progress check during a long-running turn, just check `total_seen` increasing — don't read the individual delta events.
+
+2. **Model speed matters for complex multi-turn tasks**
+   - deepseek-v4-flash on complex tasks (multi-turn research, file analysis, test runs) genuinely takes longer than a stronger model would. A ~30s task on a stronger model may take 2-3min on deepseek.
+   - **If the user has specified an escalation path** (e.g., "start deepseek, escalate to Codex 5.3 if stuck, then downgrade back"), **follow it**. Do not kill the agent and take over directly — the user expects the agent to self-escalate.
+   - When deepseek is genuinely stuck (prolonged silence >3 minutes with no tool calls), send a `set_model` command to switch to the escalation model specified by the user, then `set_model` back after the barrier is broken.
+   - See `references/model-escalation.md` for exact commands and lifecycle.
+
+2. **Mixing logs and JSON on stdout**
    - Ensure your wrapper only parses valid JSON lines.
 2. **Forgetting to persist `sessionFile`**
    - Without it, exact continuity is harder (you only have `-c`).
