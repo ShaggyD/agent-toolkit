@@ -34,3 +34,7 @@ development/*
 !development/sdlc-7-shipping-and-launch/**
 !references/
 !references/**
+!autonomous-ai-agents/
+autonomous-ai-agents/*
+!autonomous-ai-agents/pi-agent/
+!autonomous-ai-agents/pi-agent/**
