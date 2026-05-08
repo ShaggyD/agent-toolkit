@@ -94,7 +94,7 @@ Prevent the "18,000 character trap" — silent context-window degradation caused
 
 | | |
 |---|---|
-| **Author** | Capricorn (via Dustin Chadwick) |
+| **Author** | Dustin Chadwick ([@ShaggyD](https://github.com/ShaggyD)) |
 | **Inspired by** | [Andrew's OpenClaw Blueprint Series](https://youtu.be/5ec5mh41oig) — Video 2 of 8 |
 | **Category** | Productivity / Housekeeping |
 | **Files** | 1 (SKILL.md) |
@@ -124,7 +124,7 @@ Run Pi coding-agent workflows through RPC with persistent, resumable sessions an
 
 | | |
 |---|---|
-| **Author** | Hermes Agent |
+| **Author** | Dustin Chadwick ([@ShaggyD](https://github.com/ShaggyD)) |
 | **Category** | Autonomous AI Agents / RPC Orchestration |
 | **Files** | 5 (SKILL.md + 3 reference docs + 1 script) |
 

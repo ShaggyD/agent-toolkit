@@ -2,7 +2,7 @@
 name: pi-agent
 description: "Delegate coding/tasks to pi CLI over RPC with persistent, resumable sessions."
 version: 1.0.0
-author: Hermes Agent
+author: Dustin Chadwick (@ShaggyD)
 license: MIT
 metadata:
   hermes:

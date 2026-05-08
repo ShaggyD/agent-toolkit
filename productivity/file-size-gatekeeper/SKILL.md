@@ -2,7 +2,7 @@
 name: file-size-gatekeeper
 description: "Prevent silent context-window pressure and the '18,000 character trap' by enforcing file size discipline on skills, .env, SOUL.md, and config files. Inspired by Andrew's OpenClaw Blueprint series."
 version: 1.1.0
-author: Capricorn (via Dusty)
+author: Dustin Chadwick (@ShaggyD)
 source: https://youtu.be/5ec5mh41oig
 source_title: "Your OpenClaw AI Agent Is Ignoring Half Its Instructions — The 18,000 Character Trap"
 tags: [housekeeping, maintenance, config, skills, performance, context-window]
