@@ -29,6 +29,7 @@ crontab -e
 
 | File | Purpose |
 |------|---------|
+| `janitor.py` | Zero-LLM Gmail noise archiving CLI script |
 | `SKILL.md` | Full skill documentation |
 | `templates/config.yaml` | Janitor configuration template |
 | `templates/noise-senders.yaml` | Noise-sender patterns (promotions, newsletters, social, services, security) |

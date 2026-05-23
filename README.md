@@ -95,9 +95,10 @@ Two-layer Gmail triage pipeline — zero-LLM noise archiving (Janitor) + LLM-pow
 |---|---|
 | **Author** | Dustin Chadwick ([@ShaggyD](https://github.com/ShaggyD)) |
 | **Category** | Productivity / Email Management |
-| **Files** | 8 (SKILL.md + README.md + 4 templates + 3 reference docs) |
+| **Files** | 10 (janitor.py + SKILL.md + README.md + 4 templates + 3 reference docs) |
 
 **What's inside:**
+- `janitor.py` — zero-LLM Gmail noise archiving CLI script
 - `SKILL.md` — full system architecture, setup, and usage
 - `templates/config.yaml` — externalized Janitor configuration
 - `templates/noise-senders.yaml` — noise-sender patterns (promotions, newsletters, social, services, security)

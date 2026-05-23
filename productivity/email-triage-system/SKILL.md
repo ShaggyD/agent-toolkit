@@ -313,6 +313,7 @@ Patterns: security@, alert@, alerts@ for major platforms. Subject lines containi
 
 | File | Purpose |
 |------|---------|
+| `janitor.py` | Zero-LLM Gmail noise archiving CLI script |
 | `SKILL.md` | This document |
 | `README.md` | Quick-start guide |
 | `templates/config.yaml` | Janitor configuration template |

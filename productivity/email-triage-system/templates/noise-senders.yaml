@@ -44,7 +44,6 @@ newsletters:
     - "newsletter@*"
     - "weekly@*"
     - "daily@*"
-    - "noreply@*"
     # Newsletter platforms
     - "*@substack.com"
     - "*@medium.com"
