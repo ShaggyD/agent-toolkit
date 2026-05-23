@@ -1,0 +1,34 @@
+# Safe-Sender Allowlist
+# Copy this to ~/.config/email-janitor/safe-senders.yaml
+#
+# Emails from these senders are NEVER archived by the Janitor.
+# They are also passed through to the Reviewer for triage.
+#
+# Format: one email or domain pattern per entry.
+# Use exact email addresses for specific senders,
+# or domain patterns for whole domains.
+
+safe_senders:
+  # Your own domain(s) — self-explanatory
+  - "*@yourdomain.com"
+
+  # Key contacts (add specific addresses)
+  # - "boss@company.com"
+  # - "assistant@company.com"
+
+  # Personal contacts
+  # - "partner@example.com"
+  # - "kidsschool@example.org"
+
+  # Calendar and scheduling — these are time-sensitive, not noise
+  - "*@google.com"
+  - "*@zoom.us"
+  - "*@calendly.com"
+  - "*@cal.com"
+
+  # Transactional notifications you always want
+  # - "shipping@store.com"
+  # - "receipts@service.com"
+
+  # Add more as needed:
+  # - "specific-contact@freelancer.com"

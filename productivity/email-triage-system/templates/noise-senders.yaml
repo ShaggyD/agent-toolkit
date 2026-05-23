@@ -1,0 +1,132 @@
+# Noise-Sender Database
+# Copy this to ~/.config/email-janitor/noise-senders.yaml
+#
+# The Janitor matches emails against these patterns.
+# Emails matching any pattern are archived (except security — see below).
+#
+# Patterns can be:
+#   - Exact email addresses: "spam@example.com"
+#   - Domain patterns: "*@marketing.example.com" or "*.example.com"
+#   - Subject regex patterns: "/sale|discount|coupon/i"
+#
+# SECURITY emails are detected but NEVER archived — they're logged
+# for the Reviewer to triage as high-priority.
+
+promotions:
+  description: "Marketing, promos, deals, flash sales"
+  patterns:
+    # Subdomain marketing senders
+    - "*@mail.*"
+    - "*@e.*"
+    - "*@marketing.*"
+    - "*@promo.*"
+    # Known marketing platforms
+    - "*@sendgrid.net"
+    - "*@mailchimp.com"
+    - "*@constantcontact.com"
+    - "*@hubspot.com"
+    - "*@klaviyo.com"
+    - "*@braze.com"
+    - "*@iterable.com"
+    - "*@customerio.com"
+    - "*@postmarkapp.com"
+    - "*@convertkit.com"
+  subject_patterns:
+    - "/sale|discount|offer ends|coupon|\\d+% off/i"
+    - "/deal of the|flash sale|limited time|today only|exclusive offer/i"
+    - "/last chance|don't miss|act now|while supplies last/i"
+
+newsletters:
+  description: "Regular digests from content platforms and newsletters"
+  patterns:
+    # Address prefixes
+    - "digest@*"
+    - "newsletter@*"
+    - "weekly@*"
+    - "daily@*"
+    - "noreply@*"
+    # Newsletter platforms
+    - "*@substack.com"
+    - "*@medium.com"
+    - "*@ghost.io"
+    - "*@buttondown.email"
+    - "*@beehiiv.com"
+    - "*@revue.com"
+    # Content platforms
+    - "*@youtube.com"
+    - "*@reddit.com"
+    - "*@pinterest.com"
+    - "*@tumblr.com"
+  subject_patterns:
+    - "/your weekly|your daily|this week in/i"
+    - "/newsletter|digest|roundup|recap/i"
+
+social:
+  description: "Social platform notifications"
+  patterns:
+    # Social platforms
+    - "notification@*twitter.com"
+    - "notification@*x.com"
+    - "notification@linkedin.com"
+    - "notification@facebook.com"
+    - "notification@instagram.com"
+    - "notification@tiktok.com"
+    - "*@discord.com"
+    - "*@slack.com"
+    - "notify@*"
+  subject_patterns:
+    - "/new follower|new connection request|you have a/i"
+    - "/commented on your|liked your|shared your/i"
+    - "/new notification from|activity on your/i"
+
+services:
+  description: "Transactional/account emails — archived under Services/ label"
+  patterns:
+    # Cloud platforms
+    - "*@aws.*"
+    - "*@gcp.*"
+    - "*@azure.*"
+    - "*@digitalocean.com"
+    - "*@heroku.com"
+    - "*@vercel.com"
+    - "*@netlify.com"
+    - "*@render.com"
+    - "*@fly.io"
+    # Dev tools
+    - "noreply@github.com"
+    - "*@gitlab.com"
+    - "*@circleci.com"
+    - "*@datadog.com"
+    - "*@sentry.io"
+    - "*@pagerduty.com"
+    - "*@grafana.net"
+    # Productivity
+    - "*@notion.so"
+    - "*@linear.app"
+    - "*@asana.com"
+    - "*@miro.com"
+    - "*@figma.com"
+    - "*@loom.com"
+    # Finance
+    - "*@stripe.com"
+    - "*@paypal.com"
+    - "*@coinbase.com"
+  subject_patterns: []
+
+security:
+  description: "Security alerts — NOT archived, logged for Reviewer prioritization"
+  patterns:
+    - "security@*"
+    - "alert@*"
+    - "alerts@*"
+    # Major platforms known for security notifications
+    - "*@google.com"
+    - "*@microsoft.com"
+    - "*@apple.com"
+    - "*@cloudflare.com"
+    - "*@okta.com"
+    - "*@auth0.com"
+  subject_patterns:
+    - "/security alert|new sign-in|unusual login/i"
+    - "/password changed|2fa|verification code/i"
+    - "/login attempt|account recovery|suspicious/i"

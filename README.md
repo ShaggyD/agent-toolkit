@@ -85,6 +85,29 @@ OpenCode cost analyzer with detailed daily/weekly/monthly breakdowns. Shows actu
 | **Author** | Dustin Chadwick ([@ShaggyD](https://github.com/ShaggyD)) |
 | **Category** | Productivity / Analysis |
 | **Files** | 4 (SKILL.md + binary CLI + plugins/README.md) |
+|---
+
+### [email-triage-system](productivity/email-triage-system/)
+
+Two-layer Gmail triage pipeline — zero-LLM noise archiving (Janitor) + LLM-powered daily review (Reviewer) — keeps your inbox clean with minimal config.
+
+| | |
+|---|---|
+| **Author** | Dustin Chadwick ([@ShaggyD](https://github.com/ShaggyD)) |
+| **Category** | Productivity / Email Management |
+| **Files** | 8 (SKILL.md + README.md + 4 templates + 3 reference docs) |
+
+**What's inside:**
+- `SKILL.md` — full system architecture, setup, and usage
+- `templates/config.yaml` — externalized Janitor configuration
+- `templates/noise-senders.yaml` — noise-sender patterns (promotions, newsletters, social, services, security)
+- `templates/safe-senders.yaml` — safe-sender allowlist template
+- `templates/reviewer-soul.md` — Reviewer agent profile template
+- `references/gmail-api-setup.md` — OAuth setup for Gmail API
+- `references/label-conventions.md` — label hierarchy conventions
+- `references/troubleshooting.md` — common issues and fixes
+
+The system requires only Gmail API credentials and a cron entry. No database, no server, no LLM API keys for the Janitor layer.
 
 ---
 
@@ -184,7 +207,8 @@ AGENT_SKILLS/
 │   ├── karakeep-obsidian-sync/
 │   ├── file-size-gatekeeper/
 │   ├── macos-task-scheduler/
-│   └── opencode-analyzer/
+│   ├── opencode-analyzer/
+│   └── email-triage-system/
 ├── development/
 │   ├── sdlc-1-spec-driven-development/
 │   ├── sdlc-2-planning-and-task-breakdown/
