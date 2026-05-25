@@ -20,6 +20,8 @@ A plain white web-app theme with black text, blue accents, normal-case sans-seri
 
 ### Gruvbox Dark
 
+![Gruvbox Dark screenshot](references/gruvbox-dark-screenshot.png)
+
 A warm earthy dark mode inspired by the classic [gruvbox](https://github.com/morhetz/gruvbox) color palette. Easy on the eyes and cozy for late-night dashboard sessions.
 
 **Features:**
