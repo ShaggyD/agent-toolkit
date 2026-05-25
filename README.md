@@ -84,7 +84,7 @@ Two hand-crafted themes for the Hermes Agent web dashboard: **Clean WebUI** (whi
 |---|---|
 | **Author** | Dustin Chadwick ([@ShaggyD](https://github.com/ShaggyD)) |
 | **Category** | Productivity / Dashboard |
-| **Files** | 3 (SKILL.md + 2 reference YAMLs) |
+| **Files** | 3 (README.md + 2 reference YAMLs) |
 
 **Installation:**
 ```bash

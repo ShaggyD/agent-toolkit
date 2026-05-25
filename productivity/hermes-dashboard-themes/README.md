@@ -1,11 +1,3 @@
----
-name: hermes-dashboard-themes
-description: "Hermes Agent dashboard themes: Clean WebUI and Gruvbox Dark"
-version: 1.0.0
-author: Dustin Chadwick (@ShaggyD)
-tags: [hermes, dashboard, theme, ui, gruvbox]
----
-
 # Hermes Dashboard Themes
 
 Two hand-crafted themes for the [Hermes Agent](https://hermes-agent.nousresearch.com) web dashboard.
