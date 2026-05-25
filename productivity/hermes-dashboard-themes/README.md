@@ -62,6 +62,7 @@ The `customCSS` block in each theme handles framework-specific overrides that ca
 
 ## Notes
 
+- **Clean WebUI** is based on [fplanque/hermes-agent-dashboard-theme-clean](https://github.com/fplanque/hermes-agent-dashboard-theme-clean), modified with readability improvements and the Tailwind `--border` variable fix.
 - Themes use `--border: <HSL>` in `:root` to ensure Tailwind's `border-border` utility class renders the theme's border color. Without this, borders render as a faint opacity of the midground color regardless of `--color-border`.
 - The `border-border { border-color: var(--color-border) }` override provides a safety net for components that bypass the HSL variable.
 - Sidebar gets its own background color to visually separate chrome from content — something the default themes don't do.
