@@ -76,6 +76,24 @@ Schedule recurring tasks on macOS using launchd plists. Covers configuration, sc
 
 ---
 
+### [hermes-dashboard-themes](productivity/hermes-dashboard-themes/)
+
+Two hand-crafted themes for the Hermes Agent web dashboard: **Clean WebUI** (white canvas, blue accents) and **Gruvbox Dark** (warm earthy dark mode). Both include readability-focused improvements over the defaults — visible borders, sidebar background, proper heading hierarchy, and wrapping Kanban columns.
+
+| | |
+|---|---|
+| **Author** | Dustin Chadwick ([@ShaggyD](https://github.com/ShaggyD)) |
+| **Category** | Productivity / Dashboard |
+| **Files** | 3 (SKILL.md + 2 reference YAMLs) |
+
+**Installation:**
+```bash
+cp references/*.yaml ~/.hermes/dashboard-themes/
+# Reload dashboard, pick theme from bottom-left picker
+```
+
+---
+
 ### [opencode-analyzer](productivity/opencode-analyzer/)
 
 OpenCode cost analyzer with detailed daily/weekly/monthly breakdowns. Shows actual spending vs OpenRouter equivalents, plus same-token model comparisons.
@@ -209,7 +227,8 @@ AGENT_SKILLS/
 │   ├── file-size-gatekeeper/
 │   ├── macos-task-scheduler/
 │   ├── opencode-analyzer/
-│   └── email-triage-system/
+│   ├── email-triage-system/
+│   └── hermes-dashboard-themes/
 ├── development/
 │   ├── sdlc-1-spec-driven-development/
 │   ├── sdlc-2-planning-and-task-breakdown/

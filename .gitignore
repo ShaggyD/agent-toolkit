@@ -18,6 +18,8 @@ productivity/*
 !productivity/opencode-analyzer/**
 !productivity/email-triage-system/
 !productivity/email-triage-system/**
+!productivity/hermes-dashboard-themes/
+!productivity/hermes-dashboard-themes/**
 !development/
 development/*
 !development/sdlc-1-spec-driven-development/

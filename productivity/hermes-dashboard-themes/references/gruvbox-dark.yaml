@@ -1,0 +1,365 @@
+name: gruvbox-dark
+label: Gruvbox Dark
+description: Warm earthy dark mode — inspired by the classic gruvbox palette.
+
+palette:
+  background:
+    hex: "#1d2021"
+    alpha: 1.0
+  midground:
+    hex: "#ebdbb2"
+    alpha: 1.0
+  foreground:
+    hex: "#458588"
+    alpha: 0.0
+  warmGlow: "rgba(235, 219, 178, 0.06)"
+  noiseOpacity: 0
+
+typography:
+  fontSans: '"Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+  fontMono: '"JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace'
+  fontDisplay: '"Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+  fontUrl: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+  baseSize: "18px"
+  lineHeight: "1.55"
+  letterSpacing: "0"
+
+layout:
+  radius: "0.5rem"
+  density: compact
+
+assets:
+  bg: "none"
+
+colorOverrides:
+  card: "#282828"
+  cardForeground: "#ebdbb2"
+  popover: "#32302f"
+  popoverForeground: "#ebdbb2"
+  primary: "#458588"
+  primaryForeground: "#ebdbb2"
+  secondary: "#3c3836"
+  secondaryForeground: "#ebdbb2"
+  muted: "#3c3836"
+  mutedForeground: "#a89984"
+  accent: "#3c3836"
+  accentForeground: "#83a598"
+  destructive: "#cc241d"
+  destructiveForeground: "#ebdbb2"
+  success: "#98971a"
+  warning: "#d79921"
+  border: "#504945"
+  input: "#504945"
+  ring: "#458588"
+
+componentStyles:
+  card:
+    background: "#282828"
+    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.3)"
+  header:
+    background: "#1d2021"
+    borderBottom: "1px solid #504945"
+  backdrop:
+    background: "#1d2021"
+    fillerOpacity: "0"
+    fillerBlendMode: "normal"
+    backgroundSize: "auto"
+    backgroundPosition: "center"
+
+customCSS: |
+  /* Base canvas: warm dark background, warm light text. */
+  :root {
+    --background: #1d2021 !important;
+    --background-base: #1d2021 !important;
+    --midground: #ebdbb2 !important;
+    --midground-base: #ebdbb2 !important;
+    --foreground: #ebdbb2 !important;
+    --foreground-base: #ebdbb2 !important;
+    --color-foreground: #ebdbb2 !important;
+    --color-card: #282828 !important;
+    --color-card-foreground: #ebdbb2 !important;
+    --color-popover: #32302f !important;
+    --color-popover-foreground: #ebdbb2 !important;
+    --color-primary: #458588 !important;
+    --color-primary-foreground: #ebdbb2 !important;
+    --color-accent: #3c3836 !important;
+    --color-accent-foreground: #83a598 !important;
+    --color-ring: #458588 !important;
+    --warm-glow: rgba(235, 219, 178, 0.06) !important;
+    --noise-opacity-mul: 0 !important;
+    --theme-asset-bg: none !important;
+    --component-backdrop-filler-opacity: 0 !important;
+    --component-backdrop-filler-blend-mode: normal !important;
+
+    /* Wire the design-system --border HSL variable so Tailwind's
+       border-border utility renders the theme color not a faint derivative. */
+    --border: 20 7% 29% !important;
+  }
+
+  /* Make Tailwind border-border use --color-border directly. */
+  .border-border {
+    border-color: var(--color-border) !important;
+  }
+
+  /* Sidebar: subtly lighter than the main canvas so it reads as chrome. */
+  #app-sidebar {
+    background: #282828 !important;
+    background-color: #282828 !important;
+  }
+
+  /* Bump sidebar nav weight for scanability. */
+  #app-sidebar nav a {
+    font-weight: 500 !important;
+  }
+
+  /* Clear heading hierarchy. */
+  h1 {
+    font-size: 1.35rem !important;
+    font-weight: 700 !important;
+  }
+
+  h3 {
+    font-weight: 600 !important;
+  }
+
+  html,
+  body,
+  #root,
+  #root > div {
+    background: #1d2021 !important;
+    background-color: #1d2021 !important;
+    background-image: none !important;
+    color: #ebdbb2 !important;
+  }
+
+  /* Override shell Tailwind dark classes. */
+  #root > div.bg-black,
+  #root > div[class*="bg-black"] {
+    background: #1d2021 !important;
+    background-color: #1d2021 !important;
+    color: #ebdbb2 !important;
+  }
+
+  /* Kill the branded backdrop layers. */
+  body::before,
+  body::after,
+  #root::before,
+  #root::after {
+    background: none !important;
+    background-image: none !important;
+    box-shadow: none !important;
+  }
+
+  .pointer-events-none.fixed.inset-0[aria-hidden="true"] {
+    display: none !important;
+    opacity: 0 !important;
+    background: none !important;
+    background-image: none !important;
+    box-shadow: none !important;
+  }
+
+  .theme-default-filler,
+  img.theme-default-filler {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  /* Normal sans-serif UI fonts. */
+  *:not(code):not(kbd):not(pre):not(samp):not(.font-mono):not(.font-mono-ui):not(.xterm *):not(.xterm) {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  }
+
+  code,
+  kbd,
+  pre,
+  samp,
+  .font-mono,
+  .font-mono-ui {
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace !important;
+  }
+
+  /* No all-caps. */
+  .uppercase,
+  [class*="uppercase"],
+  [class*="tracking-"] {
+    text-transform: none !important;
+    letter-spacing: normal !important;
+  }
+
+  /* Links in gruvbox blue/aqua. */
+  a {
+    color: #83a598 !important;
+  }
+
+  /* Safety net: text-white on the dark canvas should resolve to warm light. */
+  h1, h2, h3, h4, h5, h6, label, p, li, dt, dd, th, td,
+  [class~="text-white"]:not(.xterm):not(.xterm *),
+  [class*="text-white/"]:not(.xterm):not(.xterm *),
+  [class~="text-background"]:not(.xterm):not(.xterm *),
+  [class*="text-background/"]:not(.xterm):not(.xterm *) {
+    color: #ebdbb2 !important;
+  }
+
+  [class~="text-muted-foreground"],
+  [class*="text-muted-foreground/"],
+  [class~="text-neutral-50"], [class~="text-zinc-50"],
+  [class~="text-slate-50"], [class~="text-stone-50"],
+  [class~="text-gray-50"] {
+    color: #a89984 !important;
+  }
+
+  svg[class~="text-white"],
+  [class~="text-white"] svg,
+  [class*="text-white/"] svg {
+    color: #a89984 !important;
+    fill: currentColor !important;
+    stroke: currentColor !important;
+  }
+
+  /* Blue/aqua surfaces get warm light text. */
+  [class~="bg-primary"], [class~="bg-blue-500"], [class~="bg-blue-600"],
+  [class~="bg-blue-700"], [class~="bg-blue-800"], [class~="bg-blue-900"] {
+    color: #ebdbb2 !important;
+  }
+
+  [class~="bg-primary"] *, [class~="bg-blue-500"] *,
+  [class~="bg-blue-600"] *, [class~="bg-blue-700"] *,
+  [class~="bg-blue-800"] *, [class~="bg-blue-900"] * {
+    color: #ebdbb2 !important;
+    fill: #ebdbb2 !important;
+    stroke: #ebdbb2 !important;
+  }
+
+  /* Buttons: primary buttons get the gruvbox blue. */
+  button[class~="bg-black"]:not(.fixed),
+  button[class~="bg-midground"]:not(.fixed),
+  button[class~="bg-foreground"]:not(.fixed),
+  button[class~="bg-current"]:not(.fixed),
+  [role="button"][class~="bg-black"]:not(.fixed),
+  [role="button"][class~="bg-midground"]:not(.fixed),
+  [role="button"][class~="bg-foreground"]:not(.fixed),
+  [role="button"][class~="bg-current"]:not(.fixed),
+  button[aria-current="page"], button[aria-selected="true"],
+  button[aria-pressed="true"], button[data-state="active"],
+  button[data-active="true"],
+  [role="button"][aria-current="page"],
+  [role="button"][aria-selected="true"],
+  [role="button"][aria-pressed="true"],
+  [role="button"][data-state="active"],
+  [role="button"][data-active="true"] {
+    background: #458588 !important;
+    background-color: #458588 !important;
+    background-image: none !important;
+    color: #ebdbb2 !important;
+    border-color: #458588 !important;
+  }
+
+  button[class~="bg-black"]:not(.fixed) *,
+  button[class~="bg-midground"]:not(.fixed) *,
+  button[class~="bg-foreground"]:not(.fixed) *,
+  button[class~="bg-current"]:not(.fixed) *,
+  [role="button"][class~="bg-black"]:not(.fixed) *,
+  [role="button"][class~="bg-midground"]:not(.fixed) *,
+  [role="button"][class~="bg-foreground"]:not(.fixed) *,
+  [role="button"][class~="bg-current"]:not(.fixed) *,
+  button[aria-current="page"] *, button[aria-selected="true"] *,
+  button[aria-pressed="true"] *, button[data-state="active"] *,
+  button[data-active="true"] *,
+  [role="button"][aria-current="page"] *,
+  [role="button"][aria-selected="true"] *,
+  [role="button"][aria-pressed="true"] *,
+  [role="button"][data-state="active"] *,
+  [role="button"][data-active="true"] * {
+    color: #ebdbb2 !important;
+    fill: #ebdbb2 !important;
+    stroke: #ebdbb2 !important;
+  }
+
+  /* Sidebar: opaque unselected, blue active with reverse video. */
+  #app-sidebar nav a,
+  #app-sidebar nav a.opacity-60,
+  #app-sidebar nav a[class*="opacity-"] {
+    opacity: 1 !important;
+    color: #ebdbb2 !important;
+    border-radius: 0.5rem !important;
+    margin: 0.1rem 0.5rem !important;
+  }
+
+  #app-sidebar nav a svg,
+  #app-sidebar nav a span {
+    color: inherit !important;
+  }
+
+  #app-sidebar nav a[aria-current="page"] {
+    background: #458588 !important;
+    background-color: #458588 !important;
+    color: #ebdbb2 !important;
+    opacity: 1 !important;
+  }
+
+  #app-sidebar nav a[aria-current="page"] svg,
+  #app-sidebar nav a[aria-current="page"] span {
+    color: #ebdbb2 !important;
+  }
+
+  #app-sidebar nav a[aria-current="page"] > span[aria-hidden="true"] {
+    display: none !important;
+  }
+
+  /* Sidebar: legible sizing. */
+  #app-sidebar nav a,
+  #app-sidebar nav a span,
+  #app-sidebar [role="group"] a,
+  #app-sidebar [role="group"] a span,
+  #app-sidebar li [role="button"],
+  #app-sidebar li [role="button"] span,
+  #app-sidebar li button,
+  #app-sidebar li button span {
+    font-size: 1rem !important;
+    line-height: 1.35 !important;
+  }
+
+  #app-sidebar nav a,
+  #app-sidebar li [role="button"],
+  #app-sidebar li button {
+    padding-top: 0.65rem !important;
+    padding-bottom: 0.65rem !important;
+  }
+
+  #app-sidebar nav svg,
+  #app-sidebar li svg {
+    width: 1rem !important;
+    height: 1rem !important;
+  }
+
+  #app-sidebar [id="hermes-sidebar-plugin-nav-heading"],
+  #app-sidebar > div > span,
+  #app-sidebar [class*="text-[0.6rem]"] {
+    font-size: 0.85rem !important;
+    line-height: 1.25 !important;
+  }
+
+  /* Kanban: wrapping columns. */
+  .hermes-kanban-columns {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: stretch !important;
+    overflow-x: visible !important;
+    scrollbar-width: auto !important;
+    gap: 0.75rem !important;
+  }
+
+  .hermes-kanban-column {
+    flex: 1 1 280px !important;
+    min-width: 260px !important;
+    max-width: 420px !important;
+    max-height: none !important;
+  }
+
+  @media (max-width: 720px) {
+    .hermes-kanban-column {
+      flex-basis: 100% !important;
+      max-width: none !important;
+    }
+  }
