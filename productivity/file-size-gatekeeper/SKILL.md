@@ -10,11 +10,19 @@ tags: [housekeeping, maintenance, config, skills, performance, context-window]
 
 # File Size Gatekeeper
 
-> **Origin:** This skill was created after analyzing [Andrew's OpenClaw Blueprint video](https://youtu.be/5ec5mh41oig) (Video 2 of 8) on the "18,000 character trap." While the video specifically addresses OpenClaw's silent file truncation, the underlying principle — **files that grow unchecked silently degrade agent performance** — applies universally to any LLM-based agent system, including Hermes Agent.
->
-> Key insight from the video: Most agent platforms have a de facto limit on per-file ingestion. OpenClaw silently truncates files over 18,000 chars, reading only the first ~14k and last ~4k, skipping the middle entirely. Hermes doesn't have this exact truncation bug, but **context window pressure is the Hermes-equivalent risk** — every extra character in a loaded file competes for space with the conversation, memory, and tool outputs. Bloated files don't break loudly; they make the agent gradually worse until you notice it's "ignoring" instructions that are buried 12k chars deep in a SKILL.md.
->
-> The four techniques from the video — **write dense, split files by topic, critical info at top/bottom, and audit regularly** — are all encoded in this skill.
+> **Origin:** This skill was created after analyzing [Andrew's OpenClaw Blueprint video](https://youtu.be/5ec5mh41oig) (Video 2 of 8) on the "18,000 character trap."
+
+## Problem
+
+Files grow unchecked and silently degrade agent performance. Every extra character in a loaded file competes for space with the conversation, memory, and tool outputs. Bloated files don't break loudly; they make the agent gradually worse until you notice it's ignoring instructions buried deep in a SKILL.md.
+
+## Built
+
+A skill that enforces file size discipline with four techniques from Andrew's OpenClaw Blueprint: write dense, split files by topic, keep critical info at top and bottom, and audit regularly. Includes on-demand audit commands and threshold-based warnings so you always know which files are getting fat.
+
+## Outcome
+
+Your agent actually reads every instruction because nothing gets truncated or pushed out of context. Files stay lean, the context window stays open for the conversation, and the gradual degradation that creeps in over months is caught before it affects behavior.
 
 ## The Problem
 

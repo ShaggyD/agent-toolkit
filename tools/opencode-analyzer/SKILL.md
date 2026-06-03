@@ -8,7 +8,19 @@ tags: [opencode, costs, analysis, productivity]
 
 # opencode-analyzer
 
-OpenCode cost analyzer with detailed daily/weekly/monthly breakdowns. Shows what you actually spent vs what it would cost on OpenRouter, plus same-token model comparisons.
+OpenCode cost analyzer with detailed daily, weekly, and monthly breakdowns. Shows what you actually spent vs what it would cost on OpenRouter, plus same-token model comparisons.
+
+## Problem
+
+OpenCode costs add up fast and the CLI doesn't tell you what you're actually spending. Free models hide real costs behind a "free" label, and without tracking you won't notice budget drift until the bill comes.
+
+## Built
+
+A cost analysis tool that queries your local OpenCode SQLite database and breaks down usage by day, week, and month. Shows top models by spending, projects cost comparisons against OpenRouter equivalents, and provides same-token repricing across comparable model tiers.
+
+## Outcome
+
+You see budget drift before it becomes a surprise bill. Daily and weekly summaries catch unusual spending patterns early, and the OpenRouter comparison helps you decide whether switching providers would save money.
 
 **SCOPE:** This skill covers **OpenCode** cost analysis only. OpenCode and OpenAI Codex CLI are separate tools with separate cost databases. Do NOT use this to analyze Codex CLI costs — see `references/codex-cli-monitoring.md`.
 

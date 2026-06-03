@@ -17,6 +17,18 @@ Build three documents that give AI agents deep context about who you are, where 
 
 **Author:** Dustin "Dusty" Chadwick ([@ShaggyD](https://github.com/ShaggyD))
 
+## Problem
+
+AI agents start every interaction from a blank slate. Without context on who you are, what you value, and where you're going, every response is generic. The agent can't prioritize, can't make judgment calls that reflect your actual personality, and can't push back on bad ideas in a way that sounds like you.
+
+## Built
+
+Three documents that give AI agents deep context about your operating framework. The Personal Constitution captures your core values and decision-making patterns. The Goals Document tracks what you're optimizing for this year. The Core Business Strategy lays out what you do, who you serve, and critically, what you've tried and failed at before. All three based on [Allie Miller's framework](https://www.youtube.com/watch?v=YfRkj9kmQf0) from her Silicon Valley Girl interview.
+
+## Outcome
+
+The agent operates from your actual context instead of guessing. It knows your communication style, your tradeoff preferences, and the mistakes you don't want to repeat. An agent that's had this setup gets directives right on the first try instead of needing three rounds of correction.
+
 ## The Three Files
 
 ### 1. Personal Constitution (timeless)

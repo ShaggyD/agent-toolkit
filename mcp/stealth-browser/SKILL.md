@@ -9,7 +9,19 @@ license: MIT
 
 # Stealth Browser MCP
 
-An MCP (Model Context Protocol) server that provides browser automation tools with **built-in WAF/Cloudflare bypass**. Uses `agent-browser` CLI with anti-detection Chrome flags and a bundled stealth extension that patches browser fingerprint vectors (`navigator.webdriver`, `plugins`, `languages`, permissions API, etc.).
+An MCP server that provides browser automation tools with built-in WAF and Cloudflare bypass. Uses agent-browser CLI with anti-detection Chrome flags and a bundled stealth extension.
+
+## Problem
+
+Browser automation MCP servers hit the same WAF blocks as everything else. Cloudflare, LinkedIn, and Indeed detect headless Chrome before your first tool call completes. Running a browser MCP server means either accepting the blocks or maintaining a separate stealth setup that has to stay in sync.
+
+## Built
+
+An MCP server that wraps agent-browser CLI with anti-detection flags and a stealth extension bundled inline -- no external dependency on a separate skill or extension install. Exposes 10 tools: navigate, snapshot, click, eval, type, set_viewport, screenshot, close, status, and install. The stealth extension patches browser fingerprint vectors at document_start, before any page scripts can detect them.
+
+## Outcome
+
+Works through Cloudflare, LinkedIn, and other WAFs from any MCP-compatible agent. Zero external dependencies beyond agent-browser itself. Drop in the MCP registration, install agent-browser, and your agent has full browser automation that bypasses protections.
 
 ## How it works
 

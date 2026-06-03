@@ -2,6 +2,18 @@
 
 Two-layer Gmail triage for inbox-zero without the cognitive load.
 
+## Problem
+
+Gmail piles up noise faster than you can triage it. Promotions, newsletters, social notifications, and automated alerts bury the actual messages you need to see. Most triage systems either require manual rules or spend LLM tokens on every single email, including the obvious spam.
+
+## Built
+
+A two-layer pipeline that splits the problem. The Janitor layer uses pattern matching (zero LLM calls) to archive known noise instantly. Promotions, newsletters, social updates, and automated alerts based on sender patterns you configure. The Reviewer layer uses an LLM to surface only the remaining signal, with configurable frequency and depth.
+
+## Outcome
+
+Noise is gone before you even see it. The Janitor runs every 15 minutes and costs nothing in tokens. The daily review shows you only the emails that matter, in a format where you can action them. No database, no server, no API keys for the Janitor layer.
+
 ## Quick Start
 
 ```bash

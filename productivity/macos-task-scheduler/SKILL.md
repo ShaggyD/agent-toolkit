@@ -8,7 +8,19 @@ tags: [macos, automation, launchd, scheduling]
 
 # macos-task-scheduler
 
-Create and manage macOS launchd plist files for scheduled tasks. Handles the launchd configuration, scheduling syntax, and task lifecycle (load/unload/start).
+Create and manage macOS launchd plist files for scheduled tasks.
+
+## Problem
+
+Setting up recurring tasks on macOS means writing XML plist files with the right keys, figuring out the scheduling syntax, and remembering the right load, unload, and start commands. One typo in the XML and launchctl silently ignores your job.
+
+## Built
+
+A skill that handles the full launchd lifecycle: generates plist files with correct XML structure, manages scheduling with StartCalendarInterval and StartInterval syntax, and covers load, unload, start, and stop commands so you don't have to remember them.
+
+## Outcome
+
+Schedule scripts without touching raw XML or digging through man pages. One reference covers the complete plist template, the common gotchas, and the exact commands to make launchd run your task.
 
 ## When to use me
 

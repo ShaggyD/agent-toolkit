@@ -1,6 +1,18 @@
 # Hermes Dashboard Themes
 
-Two hand-crafted themes for the [Hermes Agent](https://hermes-agent.nousresearch.com) web dashboard.
+Two hand-crafted themes for the Hermes Agent web dashboard.
+
+## Problem
+
+The default Hermes dashboard looks the same in every environment. A bright dark-mode dashboard is hard to read in daylight, and a light dashboard strains your eyes in a dark room. Neither matches your workspace aesthetic, and the default Kanban column layout forces horizontal scrolling.
+
+## Built
+
+Two complete themes: Clean WebUI (white canvas, dark text, blue accents, 18px base font, wrapping Kanban columns) and Gruvbox Dark (warm earthy dark mode inspired by the classic gruvbox palette, cream text, aqua links, wrapping columns). Both include proper border hierarchy, sidebar contrast, and JetBrains Mono for code.
+
+## Outcome
+
+Drop in the theme YAML files and the dashboard matches your environment instead of fighting it. Clean WebUI works in bright offices and coffee shops. Gruvbox Dark is comfortable for late-night sessions. Both fix the Kanban column wrapping so you don't need to scroll horizontally.
 
 ## Themes
 

@@ -10,9 +10,21 @@ metadata:
     related_skills: [opencode, codex, hermes-agent]
 ---
 
-# Pi Agent — RPC Session Orchestrator
+# Pi Agent -- RPC Session Orchestrator
 
-Use `pi --mode rpc` via the native Hermes **`pi_agent`** tool (🤖) when you need a long-lived, bidirectional coding agent process with durable session continuity and machine-readable events.
+Use `pi --mode rpc` for a long-lived, bidirectional coding agent process with durable session continuity and machine-readable events.
+
+## Problem
+
+Remote coding agents lose state when sessions break or auth expires. Running pi in RPC mode means managing JSON event streams, remembering session file paths, and wiring up stdin/stdout yourself. When something fails, the whole session is gone.
+
+## Built
+
+Complete coverage of the pi RPC protocol: session lifecycle (start, resume, fork), JSON command structure, event stream parsing, response extraction, and failure recovery patterns. Includes the native Hermes `pi_agent` tool plugin for full lifecycle management without manual process wrangling.
+
+## Outcome
+
+Your coding agent survives terminal restarts, auth reconnects, and network blips without losing context. Sessions are resumable, events are structured, and the failure modes you'd hit on day one are already handled.
 
 ## When to use
 

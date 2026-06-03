@@ -11,6 +11,18 @@ license: MIT
 
 Usage of `agent-browser` CLI for headless browser automation tasks.
 
+## Problem
+
+Standard headless browsers get blocked by Cloudflare, LinkedIn, Akamai, and similar WAFs immediately. The automation flags in Chrome are easy to detect. navigator.webdriver is set, plugins are empty, languages are wrong. Most sites check these signals before even loading your page.
+
+## Built
+
+A skill combining [agent-browser CLI (Vercel Labs)](https://github.com/vercel/agent-browser) with a stealth Chrome extension that patches browser fingerprint vectors at document_start. Uses specific Chrome flags (`--disable-blink-features=AutomationControlled`, real user agent, consistent viewport) plus the extension to patch navigator.webdriver, plugins, languages, and permissions API before any page scripts run.
+
+## Outcome
+
+Gets through WAFs that normally stop automated browsing cold. Confirmed working against Cloudflare, LinkedIn, Indeed, AI model pricing pages, SaaS documentation portals, and e-commerce product pages. Also includes batch flow patterns for multi-step automation sequences.
+
 ## Priority (workflow rule)
 
 **Always try agent-browser FIRST** for any web scraping or page-interaction task — before curl and before the built-in Hermes browser tools (browser_navigate, etc.). The built-in browser is for simple page reads only (no Cloudflare/Akamai). agent-browser with proper flags (see Cloudflare bypass below) has bypassed WAF-protected sites across multiple domains including AI model pricing pages, SaaS documentation portals, e-commerce product pages, and job aggregators — all of which blocked curl and the Hermes browser outright. See `references/waf-protected-site-scraping.md` for concrete eval patterns used across domains.
