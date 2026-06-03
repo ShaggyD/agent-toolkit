@@ -1,0 +1,149 @@
+---
+name: browser-automation
+description: Browser automation via agent-browser CLI (Vercel Labs). Headless Chrome navigation, snapshots, clicks, fills, screenshots, eval, and batch flows for web research, UI testing, and QA.
+version: 1.1.0
+author: Dustin Chadwick (@ShaggyD)
+tags: [browser, automation, agent-browser, chrome, web-scraping, testing]
+license: MIT
+---
+
+# Browser Automation
+
+Usage of `agent-browser` CLI for headless browser automation tasks.
+
+## Priority (workflow rule)
+
+**Always try agent-browser FIRST** for any web scraping or page-interaction task — before curl and before the built-in Hermes browser tools (browser_navigate, etc.). The built-in browser is for simple page reads only (no Cloudflare/Akamai). agent-browser with proper flags (see Cloudflare bypass below) has bypassed WAF-protected sites across multiple domains including AI model pricing pages, SaaS documentation portals, e-commerce product pages, and job aggregators — all of which blocked curl and the Hermes browser outright. See `references/waf-protected-site-scraping.md` for concrete eval patterns used across domains.
+
+## Installation
+
+```bash
+npm install -g agent-browser
+```
+
+Verify: `agent-browser --version`
+
+## Quick Start
+
+```bash
+# Open a page
+agent-browser --args "--no-sandbox,--disable-gpu,--disable-dev-shm-usage" open https://example.com
+
+# Interactive snapshot (shows elements with refs)
+agent-browser snapshot -i
+
+# Click by ref
+agent-browser click @e2
+
+# Fill a form field
+agent-browser fill @e3 "user@example.com"
+
+# Take a screenshot
+agent-browser screenshot --full
+
+# Eval JavaScript
+agent-browser eval "document.title"
+
+# Batch multi-step
+agent-browser batch '[["open","https://example.com"],["snapshot","-i"]]'
+```
+
+## Container/VM Sandbox Workaround
+
+In containerized or VM environments (Docker, Codespaces, WSL), Chrome crashes immediately with:
+```
+No usable sandbox! If you want to live dangerously, try using --no-sandbox.
+```
+
+Always pass these Chrome args for container/VM environments:
+```bash
+--args "--no-sandbox,--disable-gpu,--disable-dev-shm-usage"
+```
+
+This goes BEFORE the command, not after:
+```bash
+# CORRECT:
+agent-browser --args "--no-sandbox,--disable-gpu,--disable-dev-shm-usage" open https://example.com
+
+# WRONG (will be ignored if a daemon is already running):
+agent-browser open --args "--no-sandbox" https://example.com
+```
+
+Comma-separate multiple args. The `--args` flag uses commas or newlines as delimiters.
+
+If a previous failed attempt left a daemon running, close it first:
+```bash
+agent-browser close
+```
+
+## Common Patterns
+
+| Task | Command |
+|------|---------|
+| Open + snapshot | `open <url> && snapshot -i` |
+| Click and wait | `click @e1 && wait 2000 && snapshot -i` |
+| Fill + submit | `fill @e1 "user" && fill @e2 "pass" && click @e3` |
+| Screenshot | `screenshot --full` (or `--annotate` for labeled vision output) |
+| Download file | `download @e5 /tmp/report.pdf` |
+| Get page text | `get text @e1` |
+| Keyboard input | `keyboard type "hello world"` |
+| Page JavaScript | `eval "document.title"` |
+| Batch flow | `batch '[["cmd","arg"],["cmd","arg"]]'` |
+| Debug | `doctor` (diagnostics) or `doctor --fix` (repairs) |
+
+## Session Management
+
+- Browser persists as a daemon between commands — chain with `&&`
+- Close with `agent-browser close`
+- Reuse Chrome profile: `--profile Default open gmail.com`
+- Named session for multi-step: `--session-name myapp open ...`
+- Connect to running Chrome via CDP: `--cdp 9222 snapshot`
+
+## Pitfalls
+
+- **Daemon collision**: If a previous invocation crashed mid-flight, you'll get "daemon already running". Always `close` before retrying with different args.
+- **`--args` position**: Must go BEFORE the command (before `open`, `snapshot`, etc.), not after.
+- **No sandbox in containers**: This is the most common failure. Always include `--no-sandbox` in container/VM environments.
+- **First run**: `agent-browser` auto-downloads Chrome on first launch if not found. This can take a moment.
+- **Oversized pages**: Large snapshots auto-spill to files. Check `details.fullOutputPath` for the full content.
+- **Cloudflare / WAF bypass — maximum stealth combo (proven on Indeed, SimplyHired, ZipRecruiter):**
+
+  The stealth extension at `assets/stealth-extension/` patches `navigator.webdriver`, plugins array, languages, and permissions before any page scripts run. Combined with Chrome flags and a real UA, this has bypassed Cloudflare on all job aggregators tested.
+
+  ```bash
+  agent-browser close --all
+  agent-browser \
+    --args "--no-sandbox,--disable-gpu,--disable-dev-shm-usage,--disable-blink-features=AutomationControlled,--no-first-run,--no-default-browser-check" \
+    --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" \
+    --extension "$SKILL_DIR/assets/stealth-extension" \
+    open https://example.com
+  ```
+
+   Then set a realistic viewport and verify stealth:
+  ```bash
+  agent-browser set viewport 1920 1080
+  agent-browser eval "JSON.stringify({webdriver: navigator.webdriver, plugins: navigator.plugins.length, languages: navigator.languages})"
+  # Expected: {"webdriver":false,"plugins":5,"languages":["en-US","en"]}
+  agent-browser eval "document.body.innerText"   # full page content
+  ```
+
+  **What each piece does:**
+  - `--disable-blink-features=AutomationControlled` — removes Chrome's automation flag
+  - `--user-agent` — realistic Chrome 125 UA (update version periodically)
+  - `--extension` — loads a content script that patches detection vectors at `document_start`
+  - `--no-first-run` / `--no-default-browser-check` — avoids Chrome's first-run dialogs that give away automation
+  - `set viewport` — realistic screen dimensions (headless default is smaller)
+
+  **If still blocked:** try `--headed` on a desktop to see what Cloudflare shows, then add more patches to the `stealth.js` content script.
+
+- **WAF & CAPTCHA bot detection — fallback chain (if above fails):**
+  1. **Python `urllib.request` with realistic browser headers** — different TLS fingerprint sometimes escapes detection.
+  2. **Google search snippet extraction** — use `web_search("site:target.com ...", limit=50)` for aggregate data from indexed snippets. See `references/search-snippet-extraction.md`.
+  3. **Employer-direct career portals** — job aggregators blocked? Hit the employer's own ATS (BambooHR, Paylocity, Workday, ADP). They rarely block. See `references/employer-direct-job-scraping.md`.
+
+## References
+
+- `references/waf-protected-site-scraping.md` — Concrete agent-browser patterns for extracting data from Cloudflare/Akamai-protected sites using the stealth extension: general extraction approach, real-world use cases (AI pricing, SaaS docs, e-commerce, web app E2E), and employer-direct ATS fallback.
+- `references/content-editing-feedback-loop.md` — Edit → screenshot → deliver → iterate workflow for collaborative web content editing with the user.
+- `references/structured-data-extraction.md` — Extracting pricing tables, spec sheets, and structured data from JS-rendered pages via eval + text parsing. Covers OpenAI, Anthropic, DeepSeek, and Kimi/Moonshot.
+- `references/search-snippet-extraction.md` — Google search snippet fallback for sites behind CAPTCHA that still have indexed content.

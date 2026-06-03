@@ -42,3 +42,7 @@ development/*
 autonomous-ai-agents/*
 !autonomous-ai-agents/pi-agent/
 !autonomous-ai-agents/pi-agent/**
+!software-development/
+software-development/*
+!software-development/browser-automation/
+!software-development/browser-automation/**

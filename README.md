@@ -158,6 +158,28 @@ The skill includes an on-demand audit command, a condensing workflow, and an opt
 
 ---
 
+## Software Development Skills
+
+### [browser-automation](software-development/browser-automation/)
+
+Browser automation via agent-browser CLI (Vercel Labs) with stealth anti-detection extension. Headless Chrome navigation with Cloudflare/WAF bypass, snapshot-ref interaction, JavaScript eval extraction, and batch flows.
+
+| | |
+|---|---|
+| **Author** | Dustin Chadwick ([@ShaggyD](https://github.com/ShaggyD)) |
+| **Category** | Software Development / Browser Automation |
+| **Files** | 9 (SKILL.md + 4 reference docs + stealth extension with 2 files) |
+
+**What's inside:**
+- `SKILL.md` — full command reference, session management, Quick Start patterns, Cloudflare/WAF bypass with stealth extension
+- `assets/stealth-extension/` — Chrome extension that patches `navigator.webdriver`, plugins, and languages at page start to bypass bot detection
+- `references/waf-protected-site-scraping.md` — extraction patterns for AI pricing pages, SaaS portals, e-commerce, and web app testing
+- `references/employer-direct-job-scraping.md` — ATS portal patterns (BambooHR, Paylocity, Workday, ADP, Greenhouse, Lever)
+- `references/structured-data-extraction.md` — extracting JSON-LD, tables, and structured data from JS-rendered pages
+- `references/search-snippet-extraction.md` — Google search snippet fallback for CAPTCHA-blocked sites
+
+---
+
 ## Autonomous AI Agent Skills
 
 ### [pi-agent](autonomous-ai-agents/pi-agent/)
@@ -229,6 +251,8 @@ AGENT_SKILLS/
 │   ├── opencode-analyzer/
 │   ├── email-triage-system/
 │   └── hermes-dashboard-themes/
+├── software-development/
+│   └── browser-automation/
 ├── development/
 │   ├── sdlc-1-spec-driven-development/
 │   ├── sdlc-2-planning-and-task-breakdown/
@@ -261,8 +285,8 @@ git clone git@github.com:ShaggyD/AGENT_SKILLS.git ~/.hermes/skills
 Then load a skill by name:
 
 ```bash
-hermes -s agent-constitution-setup
-# or in-session:  /skill agent-constitution-setup
+hermes -s browser-automation
+# or in-session:  /skill browser-automation
 ```
 
 For non-Hermes agents, read the `SKILL.md` file directly and feed it as system context.
@@ -278,6 +302,7 @@ MIT — use freely, adapt openly, attribute where meaningful.
 - [file-size-gatekeeper](productivity/file-size-gatekeeper/) is inspired by [Andrew's OpenClaw Blueprint Series](https://youtu.be/5ec5mh41oig)
 - [macos-task-scheduler](productivity/macos-task-scheduler/)
 - [opencode-analyzer](productivity/opencode-analyzer/) is developed from the [AGENTIC_SKILLS](https://github.com/ShaggyD/AGENTIC_SKILLS) repository
+- [browser-automation](software-development/browser-automation/) — built and tested with agent-browser CLI (Vercel Labs)
 - [autonomous-ai-agents/pi-agent](autonomous-ai-agents/pi-agent/) documents Pi RPC orchestration patterns and Hermes-native stateful tool workflows
 - [development/sdlc-*](development/) skills are inspired by [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT) and [Agent Skills](https://addyosmani.com/blog/agent-skills/), then modified to match Dustin Chadwick's personal engineering principles for depth, review discipline, and execution preferences
 - [references/*](references/) checklists are imported from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT)
