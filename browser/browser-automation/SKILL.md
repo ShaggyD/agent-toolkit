@@ -1,7 +1,7 @@
 ---
 name: browser-automation
 description: Browser automation via agent-browser CLI (Vercel Labs). Headless Chrome navigation, snapshots, clicks, fills, screenshots, eval, and batch flows for web research, UI testing, and QA.
-version: 1.3.0
+version: 1.4.0
 author: Dustin Chadwick (@ShaggyD)
 tags: [browser, automation, agent-browser, chrome, web-scraping, testing]
 license: MIT
@@ -105,17 +105,22 @@ agent-browser close
 - **`--args` position**: Must go BEFORE the command (before `open`, `snapshot`, etc.), not after.
 - **No sandbox in containers**: This is the most common failure. Always include `--no-sandbox` in container/VM environments.
 - **First run**: `agent-browser` auto-downloads Chrome on first launch if not found. This can take a moment.
+- **`--json` response wrapper**: When using `--json`, agent-browser wraps output in `{"success":true,"data":...,"error":null}`. The actual result is nested inside `data`. For eval, the result is at `data.result`. Always unwrap the outer wrapper before accessing response fields.
 - **Oversized pages**: Large snapshots auto-spill to files. Check `details.fullOutputPath` for the full content.
 - **Cloudflare / WAF bypass — maximum stealth combo (proven on multiple WAF-protected domains):**
 
-  The stealth extension at `assets/stealth-extension/` patches `navigator.webdriver`, plugins array, languages, and permissions before any page scripts run. Combined with Chrome flags and a real UA, this has bypassed Cloudflare on all job aggregators tested.
+  The stealth extension at `extensions/stealth-extension/` (repo root) patches `navigator.webdriver`, plugins array, languages, and permissions before any page scripts run. Combined with Chrome flags and a real UA, this has bypassed Cloudflare on all job aggregators tested.
 
   ```bash
+  # Resolve extension path from skill location (../../extensions/stealth-extension/)
+  SKILL_DIR="$(cd "$(dirname "$0")" && pwd)"  # browser/browser-automation/
+  EXT_DIR="$(cd "$SKILL_DIR/../../extensions/stealth-extension" && pwd)"
+
   agent-browser close --all
   agent-browser \
     --args "--no-sandbox,--disable-gpu,--disable-dev-shm-usage,--disable-blink-features=AutomationControlled,--no-first-run,--no-default-browser-check" \
     --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" \
-    --extension "$SKILL_DIR/assets/stealth-extension" \
+    --extension "$EXT_DIR" \
     open https://example.com
   ```
 
@@ -138,10 +143,11 @@ agent-browser close
 
   ```bash
   agent-browser close --all
+  EXT_DIR="$(cd "$(dirname "$0")/../../extensions/stealth-extension" && pwd)"
   agent-browser \
     --args "--no-sandbox,--disable-gpu,--disable-dev-shm-usage,--disable-blink-features=AutomationControlled,--no-first-run,--no-default-browser-check" \
     --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" \
-    --extension "$SKILL_DIR/assets/stealth-extension" \
+    --extension "$EXT_DIR" \
     open "https://www.linkedin.com/jobs/search/?keywords=KEYWORDS&location=LOCATION&f_TPR=r604800"
   ```
 
@@ -176,7 +182,9 @@ agent-browser close
   }));
   ```
 
-  **Key insight:** Pass multiple CSS selectors comma-separated and query them all — LinkedIn renames classes per session but keeps semantic attribute patterns stable (`data-anonymize`, `href*="/jobs/view"`). Always fall back to `document.body.innerText` when structured extraction returns 0 items.
+  **Key insight:** Pass multiple CSS selectors comma-separated and query them all — LinkedIn renames classes per session but keeps semantic attribute patterns stable (data-anonymize, href*=/jobs/view). Always fall back to document.body.innerText when structured extraction returns 0 items.
+
+  **Job detail extraction (employment type + salary):** LinkedIn search result cards do NOT display employment type or salary range. To get these, click into individual job cards and extract from the detail panel. After clicking a job link, query document.querySelector("main").innerText and filter for lines containing Employment type, Salary, Part-time, Full-time, or $. The detail panel updates in-place after each click.
 
   **If still blocked:** try `--headed` on a desktop to see what Cloudflare shows, then add more patches to the `stealth.js` content script.
 

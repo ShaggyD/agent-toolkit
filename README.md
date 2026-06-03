@@ -1,71 +1,69 @@
 # agent-toolkit
 
-A collection of portable skills, standalone tools, MCP servers, browser extensions, and UI themes for AI agents — built from real workflow needs, not templates.
-
-**Provider-agnostic.** Every artifact works with Hermes, Claude, ChatGPT, Codex, or any agent that can read a SKILL.md and run a CLI. Platform-specific content lives in a single `hermes/` directory.
+Skills, tools, MCP servers, and configuration for AI agents. Each piece was built for a real problem - not as a demo. Provider-agnostic where possible, with a single directory for platform-specific content.
 
 ---
 
 ## What's Inside
 
-| Layer | Category | Contents |
-|-------|----------|----------|
-| 📖 **Skills** | `productivity/` | Agent constitution setup, file-size gatekeeper, macOS task scheduler |
-| 📖 **Skills** | `development/` | SDLC pipeline — spec, plan, implement, test, review, simplify, ship |
-| 📖 **Skills** | `browser/` | Browser automation with Cloudflare/WAF bypass |
-| 📖 **Skills** | `autonomous-agents/` | Pi agent orchestration patterns |
-| 🔧 **Tools** | `tools/` | Standalone CLIs — bookmark sync (karakeep), cost analysis (opencode), email triage |
-| 🔌 **MCP** | `mcp/` | Stealth browser MCP server — WAF-bypassing browser automation |
-| 🌐 **Extensions** | `extensions/` | Chrome stealth extension — anti-bot-detection fingerprint patching |
-| 🎨 **Themes** | `themes/` | Hermes dashboard themes — Clean WebUI and Gruvbox Dark |
-| 🏛️ **Platform** | `hermes/` | Hermes-specific tool plugins and scripts |
-| 📚 **References** | `references/` | Shared checklists — security, performance, accessibility, testing |
+| Area | Directory | Contents |
+|------|-----------|----------|
+| Skills | `productivity/` | Agent onboarding, context discipline, task scheduling |
+| Skills | `development/` | SDLC pipeline - spec through ship (7 phases) |
+| Skills | `browser/` | Browser automation with Cloudflare/WAF bypass |
+| Skills | `autonomous-agents/` | Pi agent orchestration patterns |
+| Tools | `tools/` | Bookmark sync, cost analysis, email triage CLIs |
+| MCP | `mcp/` | WAF-bypassing browser automation via MCP protocol |
+| Extensions | `extensions/` | Chrome stealth extension for bot detection bypass |
+| Themes | `themes/` | Hermes dashboard themes |
+| Platform | `hermes/` | Hermes-specific tool plugins and scripts |
+| References | `references/` | Shared checklists |
 
 ### Directory Map
 
 ```
 agent-toolkit/
-├── productivity/                   📖 Skill category
-│   ├── agent-constitution-setup/     3-doc onboarding system
-│   ├── file-size-gatekeeper/         Context window discipline
-│   └── macos-task-scheduler/         launchd automation
-├── development/                    📖 Skill category
-│   └── sdlc-1-through-7/             7-phase SDLC pipeline
-├── browser/                        📖 Skill category
-│   └── browser-automation/           agent-browser + stealth extension
-├── autonomous-agents/              📖 Skill category
-│   └── pi-agent/                     Pi RPC orchestration patterns
-├── tools/                          🔧 Standalone CLIs
-│   ├── karakeep/                     Bookmark sync tool
-│   ├── opencode-analyzer/            OpenCode cost analysis
-│   └── email-triage/                 Gmail noise archiver + reviewer
-├── mcp/                            🔌 MCP servers
-│   └── stealth-browser/              Browser automation with WAF bypass
-├── extensions/                     🌐 Browser extensions
-│   └── stealth-extension/            Manifest V3 anti-detection extension
-├── themes/                         🎨 UI themes
-│   └── hermes-dashboard/             Clean WebUI + Gruvbox Dark
-├── hermes/                         🏛️ Platform-specific
-│   └── pi-agent/                     Hermes tool plugin for Pi RPC
-├── references/                     📚 Shared docs
-│   ├── security-checklist.md
-│   ├── performance-checklist.md
-│   ├── accessibility-checklist.md
-│   └── testing-patterns.md
-├── AGENTS.md                       Agent operating guide
-├── README.md                       ← you are here
-└── LICENSE                         MIT
+  productivity/                   Skills
+    agent-constitution-setup/      3-doc onboarding system
+    file-size-gatekeeper/          Context window discipline
+    macos-task-scheduler/          launchd automation
+  development/                    Skills
+    sdlc-1-through-7/              7-phase SDLC pipeline
+  browser/                        Skills
+    browser-automation/            agent-browser + stealth extension
+  autonomous-agents/              Skills
+    pi-agent/                      Pi RPC orchestration
+  tools/                          Standalone CLIs
+    karakeep/                      Bookmark sync
+    opencode-analyzer/             OpenCode cost analysis
+    email-triage/                  Gmail noise archiver + reviewer
+  mcp/                            MCP servers
+    stealth-browser/               Browser automation with WAF bypass
+  extensions/                     Browser extensions
+    stealth-extension/             Manifest V3 anti-detection extension
+  themes/                         UI themes
+    hermes-dashboard/              Clean WebUI + Gruvbox Dark
+  hermes/                         Platform-specific
+    pi-agent/                      Hermes tool plugin for Pi RPC
+  references/                     Shared docs
+    security-checklist.md
+    performance-checklist.md
+    accessibility-checklist.md
+    testing-patterns.md
+  AGENTS.md                       Agent operating guide
+  README.md                       This file
+  LICENSE                         MIT
 ```
 
-## Installation
+## Install
 
 ```bash
 git clone git@github.com:ShaggyD/agent-toolkit.git ~/agent-toolkit
 
-# Hermes users: symlink skills for discovery
+# Hermes: symlink for skill discovery
 ln -sf ~/agent-toolkit ~/.hermes/skills
 
-# Or clone directly to Hermes skills dir
+# Or clone directly to where Hermes looks
 git clone git@github.com:ShaggyD/agent-toolkit.git ~/.hermes/skills
 ```
 
@@ -76,49 +74,43 @@ git clone git@github.com:ShaggyD/agent-toolkit.git ~/.hermes/skills
 hermes -s browser-automation
 # or in-session:  /skill browser-automation
 
-# Other agents: read any SKILL.md directly as context
+# Other agents: read any SKILL.md as context
 ```
 
-### Setting Up MCP Servers
+### MCP Servers
 
 ```bash
 hermes mcp add stealth-browser \
   --command "python3 /path/to/mcp/stealth-browser/assets/mcp_server.py"
 ```
 
-### Using Tools
+### Tools
 
-Tools are standalone — just add the directory to your PATH or copy binaries:
+Tools are standalone binaries:
 
 ```bash
 cp tools/karakeep/kk ~/.local/bin/
 cp tools/opencode-analyzer/opencode-cost ~/.local/bin/
 ```
 
-## Standout Artifacts
+## Highlighted Pieces
 
-1. **SDLC Pipeline** — 7 ordered skills (spec → plan → implement → test → review → simplify → ship) for structured feature delivery. Adapted from Addy Osmani's open-source framework.
+1. **SDLC Pipeline** - 7 ordered skills (spec, plan, implement, test, review, simplify, ship). Adapted from Addy Osmani's open-source framework.
 
-2. **Stealth Browser MCP** — MCP server wrapping agent-browser with anti-detection flags and a bundled content script that patches `navigator.webdriver`, `plugins`, `languages`, and permissions API. Bypasses Cloudflare, LinkedIn, and Indeed without paid proxies.
+2. **Stealth Browser MCP** - MCP server wrapping agent-browser with anti-detection flags and a bundled content script that patches navigator.webdriver, plugins, languages, and permissions API. Bypasses Cloudflare, LinkedIn, and Indeed without paid proxies.
 
-3. **Stealth Extension** — Manifest V3 Chrome extension loaded at `document_start` that patches browser fingerprint vectors before any page scripts run.
+3. **Stealth Extension** - Manifest V3 Chrome extension that patches browser fingerprint vectors at document_start, before page scripts run.
 
-4. **Email Triage System** — Two-layer Gmail pipeline with a zero-LLM noise archiver and an LLM-powered daily reviewer. No database, no server, no LLM API keys for the Janitor layer.
+4. **Email Triage** - Two-layer Gmail pipeline: zero-LLM noise archiver (Janitor) + LLM-powered daily reviewer. No database, no server, no API keys for the Janitor layer.
 
-5. **Pi Agent Orchestration** — Stateful RPC control patterns for remote coding agents. Auth, session lifecycle, response extraction, failure modes.
+5. **Pi Agent Orchestration** - Stateful RPC control patterns for remote coding agents. Covers auth, session lifecycle, response extraction, and failure modes.
 
 ## License
 
-MIT — use freely, adapt openly, attribute where meaningful.
+MIT - use freely, adapt openly, attribute where meaningful.
 
-**Attribution:**
-- SDLC skills adapted from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT)
-- Shared checklists imported from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT)
-- Constitution framework by Allie Miller via Silicon Valley Girl podcast
-- File-size-gatekeeper inspired by Andrew's OpenClaw Blueprint Series
-- Browser automation built with agent-browser CLI (Vercel Labs)
-- Pi agent patterns documented from production usage
+SDLC skills adapted from addyosani/agent-skills (MIT). Shared checklists imported from the same source. Constitution framework by Allie Miller (Silicon Valley Girl). Browser automation built with agent-browser CLI (Vercel Labs).
 
 ---
 
-*Maintained by [Dustin "Dusty" Chadwick](https://github.com/ShaggyD)*
+Maintained by Dustin "Dusty" Chadwick
