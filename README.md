@@ -11,7 +11,7 @@ Skills, tools, MCP servers, browser extensions, and UI themes for AI agents. Eve
 Daily agent workflows.
 
 <table>
-<tr><td nowrap><a href="productivity/agent-constitution-setup/">agent-constitution-setup</a></td><td>Three documents (constitution, goals, strategy) that give an agent context on who you are and how you operate. Based on Allie Miller's framework from the Silicon Valley Girl podcast.</td></tr>
+<tr><td nowrap><a href="productivity/agent-constitution-setup/">agent-constitution-setup</a></td><td>Three documents (constitution, goals, strategy) that give an agent context on who you are and how you operate. Based on <a href="https://www.youtube.com/watch?v=YfRkj9kmQf0">Allie Miller's framework from the Silicon Valley Girl podcast</a> (hosted by Marina Mogilko).</td></tr>
 </table>
 
 ### development/
@@ -115,9 +115,9 @@ Attribution:
 
 - SDLC skills adapted from <a href="https://github.com/addyosmani/agent-skills">addyosmani/agent-skills</a> (MIT)
 - Shared checklists from <a href="https://github.com/addyosmani/agent-skills">addyosmani/agent-skills</a> (MIT)
-- Constitution framework by Allie Miller via Silicon Valley Girl podcast
+- Constitution framework by <a href="https://www.youtube.com/watch?v=YfRkj9kmQf0">Allie Miller via Silicon Valley Girl podcast</a> (hosted by Marina Mogilko)
 - Browser automation built with <a href="https://github.com/vercel/agent-browser">agent-browser CLI (Vercel Labs)</a>
-- File-size-gatekeeper inspired by Andrew's OpenClaw Blueprint Series
+- File-size-gatekeeper inspired by <a href="https://youtu.be/5ec5mh41oig">Andrew's OpenClaw Blueprint Series</a>
 
 ---
 
