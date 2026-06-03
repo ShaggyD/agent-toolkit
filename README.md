@@ -180,6 +180,29 @@ Browser automation via agent-browser CLI (Vercel Labs) with stealth anti-detecti
 
 ---
 
+### [stealth-browser-mcp](software-development/stealth-browser-mcp/)
+
+MCP server providing browser automation tools that bypass Cloudflare, LinkedIn, Indeed, and other WAF-protected sites. Uses agent-browser CLI with anti-detection flags and a bundled stealth extension. Self-contained — no external skill dependencies.
+
+| | |
+|---|---|
+| **Author** | Dustin Chadwick ([@ShaggyD](https://github.com/ShaggyD)) |
+| **Category** | Software Development / Browser Automation / MCP |
+| **Files** | 2 (SKILL.md + MCP server script) |
+
+**What's inside:**
+- `SKILL.md` — installation, configuration, tool reference, and usage examples
+- `assets/mcp_server.py` — self-contained MCP server with bundled stealth extension (patches `navigator.webdriver`, plugins, languages, permissions API, and screen metrics)
+
+**Install:**
+```bash
+hermes mcp add stealth-browser --command "python3 \$HOME/.hermes/skills/software-development/stealth-browser-mcp/assets/mcp_server.py"
+```
+
+**Tools exposed:** `navigate`, `snapshot`, `click`, `eval`, `type`, `set_viewport`, `screenshot`, `close`, `status`, `install`
+
+---
+
 ## Autonomous AI Agent Skills
 
 ### [pi-agent](autonomous-ai-agents/pi-agent/)
@@ -210,7 +233,7 @@ Run Pi coding-agent workflows through RPC with persistent, resumable sessions an
 
 These seven skills are adapted from Addy Osmani's [agent-skills](https://github.com/addyosmani/agent-skills) project (MIT), described in his [Agent Skills](https://addyosmani.com/blog/agent-skills/) blog post, and organized with an ordered `sdlc-<n>-` prefix.
 
-**Default policy:** Use **SDLC 1–6 as required phases when those skills exist in the environment**. Treat **SDLC 7 as optional**, based on release/deployment scope.
+**Default policy:** Use SDLC 1–6 as required phases when those skills exist in the environment. Treat **SDLC 7 as optional**, based on release/deployment scope.
 
 | Step | Skill | Purpose |
 |---|---|---|
@@ -252,7 +275,8 @@ AGENT_SKILLS/
 │   ├── email-triage-system/
 │   └── hermes-dashboard-themes/
 ├── software-development/
-│   └── browser-automation/
+│   ├── browser-automation/
+│   └── stealth-browser-mcp/
 ├── development/
 │   ├── sdlc-1-spec-driven-development/
 │   ├── sdlc-2-planning-and-task-breakdown/
@@ -303,6 +327,7 @@ MIT — use freely, adapt openly, attribute where meaningful.
 - [macos-task-scheduler](productivity/macos-task-scheduler/)
 - [opencode-analyzer](productivity/opencode-analyzer/) is developed from the [AGENTIC_SKILLS](https://github.com/ShaggyD/AGENTIC_SKILLS) repository
 - [browser-automation](software-development/browser-automation/) — built and tested with agent-browser CLI (Vercel Labs)
+- [stealth-browser-mcp](software-development/stealth-browser-mcp/) — MCP server using agent-browser CLI with bundled stealth extension
 - [autonomous-ai-agents/pi-agent](autonomous-ai-agents/pi-agent/) documents Pi RPC orchestration patterns and Hermes-native stateful tool workflows
 - [development/sdlc-*](development/) skills are inspired by [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT) and [Agent Skills](https://addyosmani.com/blog/agent-skills/), then modified to match Dustin Chadwick's personal engineering principles for depth, review discipline, and execution preferences
 - [references/*](references/) checklists are imported from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT)

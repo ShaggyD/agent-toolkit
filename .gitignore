@@ -46,3 +46,5 @@ autonomous-ai-agents/*
 software-development/*
 !software-development/browser-automation/
 !software-development/browser-automation/**
+!software-development/stealth-browser-mcp/
+!software-development/stealth-browser-mcp/**
