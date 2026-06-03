@@ -4,44 +4,46 @@
 !AGENTS.md
 !README.md
 !LICENSE
+# Shared references
 !references/
 !references/**
-# Skills
-!skills/
-skills/*
-!skills/productivity/
-skills/productivity/*
-!skills/productivity/agent-constitution-setup/
-!skills/productivity/agent-constitution-setup/**
-!skills/productivity/file-size-gatekeeper/
-!skills/productivity/file-size-gatekeeper/**
-!skills/productivity/macos-task-scheduler/
-!skills/productivity/macos-task-scheduler/**
-!skills/development/
-skills/development/*
-!skills/development/sdlc-1-spec-driven-development/
-!skills/development/sdlc-1-spec-driven-development/**
-!skills/development/sdlc-2-planning-and-task-breakdown/
-!skills/development/sdlc-2-planning-and-task-breakdown/**
-!skills/development/sdlc-3-incremental-implementation/
-!skills/development/sdlc-3-incremental-implementation/**
-!skills/development/sdlc-4-test-driven-development/
-!skills/development/sdlc-4-test-driven-development/**
-!skills/development/sdlc-5-code-review-and-quality/
-!skills/development/sdlc-5-code-review-and-quality/**
-!skills/development/sdlc-6-code-simplification/
-!skills/development/sdlc-6-code-simplification/**
-!skills/development/sdlc-7-shipping-and-launch/
-!skills/development/sdlc-7-shipping-and-launch/**
-!skills/autonomous-agents/
-skills/autonomous-agents/*
-!skills/autonomous-agents/pi-agent/
-!skills/autonomous-agents/pi-agent/**
-!skills/browser/
-skills/browser/*
-!skills/browser/browser-automation/
-!skills/browser/browser-automation/**
-# Tools
+# Productivity skills
+!productivity/
+productivity/*
+!productivity/agent-constitution-setup/
+!productivity/agent-constitution-setup/**
+!productivity/file-size-gatekeeper/
+!productivity/file-size-gatekeeper/**
+!productivity/macos-task-scheduler/
+!productivity/macos-task-scheduler/**
+# Development skills
+!development/
+development/*
+!development/sdlc-1-spec-driven-development/
+!development/sdlc-1-spec-driven-development/**
+!development/sdlc-2-planning-and-task-breakdown/
+!development/sdlc-2-planning-and-task-breakdown/**
+!development/sdlc-3-incremental-implementation/
+!development/sdlc-3-incremental-implementation/**
+!development/sdlc-4-test-driven-development/
+!development/sdlc-4-test-driven-development/**
+!development/sdlc-5-code-review-and-quality/
+!development/sdlc-5-code-review-and-quality/**
+!development/sdlc-6-code-simplification/
+!development/sdlc-6-code-simplification/**
+!development/sdlc-7-shipping-and-launch/
+!development/sdlc-7-shipping-and-launch/**
+# Autonomous agent skills
+!autonomous-agents/
+autonomous-agents/*
+!autonomous-agents/pi-agent/
+!autonomous-agents/pi-agent/**
+# Browser automation skills
+!browser/
+browser/*
+!browser/browser-automation/
+!browser/browser-automation/**
+# Standalone tools
 !tools/
 tools/*
 !tools/karakeep/
@@ -50,22 +52,22 @@ tools/*
 !tools/opencode-analyzer/**
 !tools/email-triage/
 !tools/email-triage/**
-# MCP Servers
+# MCP servers
 !mcp/
 mcp/*
 !mcp/stealth-browser/
 !mcp/stealth-browser/**
-# Browser Extensions
+# Browser extensions
 !extensions/
 extensions/*
 !extensions/stealth-extension/
 !extensions/stealth-extension/**
-# Themes
+# UI themes
 !themes/
 themes/*
 !themes/hermes-dashboard/
 !themes/hermes-dashboard/**
-# Hermes-specific
+# Hermes-specific platform config
 !hermes/
 hermes/*
 !hermes/pi-agent/

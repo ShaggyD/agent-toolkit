@@ -6,77 +6,91 @@ This file tells AI coding agents how to work with this repository. Read it befor
 
 ## Repository Purpose
 
-A collection of **portable, provider-agnostic skill documents** for AI agents. Skills give agents deep context about a specific task, workflow, or domain. They are designed to be exported from one agent platform and imported into another without modification.
+A collection of **portable, provider-agnostic artifacts for AI agents** — skills, tools, MCP servers, browser extensions, and UI themes. Each artifact is designed to be exported from one agent platform and imported into another without modification.
 
 ## Canonical Structure
 
 ```
-AGENT_SKILLS/
+agent-toolkit/
 ├── AGENTS.md                     ← this file
-├── README.md                     ← skill index, must stay in sync
+├── README.md                     ← artifact index
 ├── LICENSE                       ← MIT
 ├── .gitignore                    ← allowlist pattern
-└── <category>/
-    └── <skill-name>/
-        ├── SKILL.md              ← core instructions (required)
-        ├── references/           ← deep-dive reference material (optional)
-        ├── templates/            ← template files (optional)
-        └── ...                   ← binaries, configs, etc. (optional)
+├── <category>/
+│   └── <name>/
+│       ├── SKILL.md              ← core instructions (skills, tools, MCP)
+│       ├── references/           ← deep-dive reference material (optional)
+│       ├── assets/               ← binaries, scripts, configs (optional)
+│       └── templates/            ← template files (optional)
+└── hermes/                       ← platform-specific content
 ```
+
+### Category Types
+
+| Category | Purpose | Hermes discovers? |
+|----------|---------|-------------------|
+| `productivity/` | Pure skill docs (SKILL.md) | ✅ Yes |
+| `development/` | Pure skill docs (SKILL.md) | ✅ Yes |
+| `browser/` | Pure skill docs (SKILL.md) | ✅ Yes |
+| `autonomous-agents/` | Pure skill docs (SKILL.md) | ✅ Yes |
+| `tools/` | Standalone CLIs + SKILL.md docs | ✅ Yes (SKILL.md loaded) |
+| `mcp/` | MCP servers + SKILL.md docs | ✅ Yes (SKILL.md loaded) |
+| `extensions/` | Browser extension assets | ❌ No SKILL.md |
+| `themes/` | Dashboard theme configs | ❌ No SKILL.md |
+| `references/` | Shared reference docs | ❌ No SKILL.md |
+| `hermes/` | Platform-specific tooling | ✅ Yes |
 
 ### Conventions
 
-- **Category directories** are flat, single-level: `productivity/`, `devops/`, `design/`, etc. No nested subcategories.
-- **Skill directories** are kebab-case, descriptive, and unique across categories.
-- **`SKILL.md`** is the primary file an agent reads. It must be self-contained enough for the agent to do its job, but reference material exceeding ~18 000 characters should be split into `references/` (see [file-size-gatekeeper](productivity/file-size-gatekeeper/)).
-- **Provider-agnostic language**: Do not reference Hermes, Claude, ChatGPT, Codex, or any specific agent platform in skill content unless the skill is explicitly about that platform. Use "the agent" or "the user's AI agent."
-- **Binaries** (e.g., `kk` in `karakeep-obsidian-sync/`) are committed directly alongside `SKILL.md` when the skill ships a tool.
+- **Category directories** are flat, single-level: `productivity/`, `development/`, `tools/`, `mcp/`, etc.
+- **Name directories** are kebab-case, descriptive, and unique.
+- **`SKILL.md`** is the primary instruction file. It must be self-contained enough for the agent to do its job, but reference material exceeding ~18 000 characters should be split into `references/`.
+- **Provider-agnostic language**: Do not reference Hermes, Claude, ChatGPT, Codex, or any specific agent platform in content outside `hermes/`. Use "the agent" or "the user's AI agent." The `hermes/` directory is the only exception.
+- **Binaries** (e.g., `kk` in `tools/karakeep/`) are committed alongside their SKILL.md.
+- **MCP servers** live in `mcp/<name>/` with `SKILL.md` + `assets/mcp_server.py`.
+- **Browser extensions** live in `extensions/<name>/` with `manifest.json` and JS files.
 
 ## Editing Rules
 
 ### Before You Edit
 
 1. **Read this file.** (You just did. Good.)
-2. **Read `README.md`** to understand the skill index layout. The index lists every skill with a table, author, description, category, and file count. Adding a new skill means adding an index entry.
-3. **Check `.gitignore`.** Changes that introduce new files must add allowlist entries.
-4. **Check file sizes.** SKILL.md should stay under 18 000 characters. If you're adding substantial content, split into `references/` or `templates/` instead.
+2. **Read `README.md`** to understand the full artifact index.
+3. **Check `.gitignore`.** New files need allowlist entries.
+4. **Check file sizes.** SKILL.md should stay under 18 000 characters.
 
 ### During Editing
 
 - **Preserve the frontmatter** — each `SKILL.md` starts with YAML frontmatter (`name`, `description`, `version`, `author`, `tags`). Keep it accurate.
-- **Don't break provider-agnosticism** — avoid platform-specific terminology unless the skill is platform-specific by design.
-- **Keep `README.md` in sync** — the skill index table must include every published skill. Categories, names, descriptions, and file counts must match reality.
-- **Don't refactor unrelated skills** — a change to one skill should not touch other skills unless the change is structural (e.g., renaming a category).
-- **Use relative links** where possible between files in the repo.
+- **Don't break provider-agnosticism** — avoid platform-specific terminology outside `hermes/`.
+- **Keep `README.md` in sync** — the artifact index must list every published item.
+- **Don't refactor unrelated artifacts** — a change to one should not touch another unless structural.
+- **Use relative links** where possible.
 
 ### After Editing
 
-Run this checklist before committing:
-
-- [ ] `git status` shows only the intended changes (no stray file additions)
+- [ ] `git status` shows only intended changes
 - [ ] New files have `!` allowlist entries in `.gitignore`
-- [ ] `wc -c <path>/SKILL.md` < 18 000 for any modified or added skill
-- [ ] `README.md` index includes the skill if it's new
-- [ ] All internal links (e.g., `../karakeep-obsidian-sync/`) are valid
-- [ ] YAML frontmatter is present and well-formed on any new `SKILL.md`
-- [ ] No platform-specific language leaked into a general-purpose skill
+- [ ] `wc -c <path>/SKILL.md` < 18 000 for any modified or new skill
+- [ ] `README.md` includes the artifact if it's new
+- [ ] All internal links are valid
+- [ ] YAML frontmatter is present on new `SKILL.md`
+- [ ] No platform-specific language leaked outside `hermes/`
 
 ## Git Workflow
 
-- **Commits**: Use conventional commit prefixes: `feat:` for new skills, `fix:` for bug fixes, `docs:` for documentation, `chore:` for housekeeping.
-- **Branching**: Direct commits to `main` are fine for single-skill changes. For repo-wide restructuring or multi-skill changes, use a feature branch.
-- **The `.gitignore` allowlist**: The repo root doubles as a Hermes Agent skills directory. Hermes built-in skills live on disk but are not tracked. Only explicitly published skills (those with `!` entries in `.gitignore`) are committed. When adding a new tracked file, add the corresponding `!` line.
+- **Commits**: Use conventional commit prefixes: `feat:`, `fix:`, `docs:`, `chore:`.
+- **Branching**: Direct commits to `main` for single-artifact changes. Feature branches for repo-wide restructuring.
+- **The `.gitignore` allowlist**: Only explicitly published artifacts (those with `!` entries) are tracked. When adding a new tracked file, add the corresponding `!` line.
 
 ## Key Files at a Glance
 
 | File | Purpose |
 |---|---|
-| `README.md` | Skill index — update when adding/removing skills |
+| `README.md` | Artifact index — update when adding/removing anything |
 | `AGENTS.md` | This file — agent operating guide |
-| `.gitignore` | Allowlist for tracked skills |
-| `productivity/<skill>/SKILL.md` | Core instruction file for a skill |
-| `productivity/<skill>/references/` | Extended reference material for a skill |
+| `.gitignore` | Allowlist for tracked artifacts |
 
 ---
 
-*Questions an agent should ask itself before starting work: "Do I know where the skill index lives? Have I checked `.gitignore`? Is my edit provider-agnostic? Is this skill's SKILL.md under the size threshold?"*
+*Questions an agent should ask itself before starting work: "Have I checked `.gitignore`? Is my edit provider-agnostic? Is the SKILL.md under the size threshold?"*
