@@ -1,7 +1,7 @@
 ---
 name: stealth-browser-mcp
 description: MCP server providing browser automation tools that bypass Cloudflare, LinkedIn, Indeed, and other WAF-protected sites using agent-browser with anti-detection stealth.
-version: 1.0.0
+version: 1.1.0
 author: Dustin Chadwick (@ShaggyD)
 tags: [browser, automation, stealth, mcp, cloudflare, bypass, agent-browser, web-scraping]
 license: MIT
@@ -127,3 +127,43 @@ The MCP server is fully self-contained — the stealth extension JS and manifest
 - Python 3.10+
 - `mcp` package (`pip install mcp`)
 - `agent-browser` CLI + Chromium (`npm install -g agent-browser && agent-browser install --with-deps`)
+
+## Troubleshooting
+
+### MCP server registers but tools return errors
+
+```bash
+# Check the server connected and found tools
+hermes mcp test stealth-browser
+
+# Check agent-browser is installed and Chromium is ready
+agent-browser doctor
+```
+
+### "Daemon already running" conflicts
+
+If agent-browser was used manually before starting the MCP server, close orphaned daemons:
+
+```bash
+agent-browser close --all
+```
+
+Then the next `navigate` call will start a fresh session.
+
+### Eval returns "(empty result)"
+
+The page may not have finished loading. Call `navigate` first, wait briefly, then `eval`. For pages with heavy JS rendering, use `eval("document.readyState")` to check if the page is fully loaded.
+
+### Server exits immediately after starting
+
+Check stderr for import errors:
+
+```bash
+python3 /path/to/mcp_server.py 2>&1 </dev/null | head -5
+```
+
+Most common: `pip install mcp` is missing.
+
+## Architecture
+
+See `references/architecture.md` for detailed design: daemon lifecycle, JSON response unwrapping, thread safety model, command output shapes, and stealth extension internals.

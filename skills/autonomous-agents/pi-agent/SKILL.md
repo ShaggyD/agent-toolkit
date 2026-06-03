@@ -203,33 +203,59 @@ Using `{"prompt": ...}` can fail with provider/runtime errors.
 
 ## Pitfalls
 
-1. **Don't confuse poll() noise with slow model speed**
-   - When you `poll()` while a turn is in progress, you'll see character-level `thinking_delta` events and tool stdout streaming — this is **intermediate streaming events**, not the agent typing slowly. The agent finishes fast; you're just reading raw event fragments.
+1. **Delegate git operations to pi — don't run them yourself via terminal**
+   - When you need to stage, commit, or push changes, hand the work to pi agent with a structured prompt. Give it the exact file lists, commit messages, and order of operations in one message. This session proved pi handles multi-commit workflows reliably.
+   - Example pattern: `"Stage these files, commit with message X. Then stage these, commit with message Y. Do them in order."` — pi executes them sequentially, each as its own turn.
+   - **Always run `npm test` (or equivalent) after any code change** before committing. Dusty explicitly emphasizes this. If pi agent made the changes, ask it to run tests as the final step of the commit workflow.
+   - **Don't** run `git add` / `git commit` yourself via the terminal tool when pi is available for the repo. The user expects the agent to do the git work.
+
+2. **Distinguish poll noise from genuine model slowness**
+   - When you `poll()` while a turn is in progress, you'll see character-level `thinking_delta` events and tool stdout streaming — this is **intermediate streaming events**, not the agent typing slowly. Some agents finish fast; you're just reading raw event fragments.
    - **Correct assessment approach**: `send()` the prompt, then `wait(until_event='turn_end')` to block for completion, then `poll()` for the final result. The time between `send` and `turn_end` is the true wall-clock time — not what the character deltas suggest.
    - **`poll()` during an active turn** shows every `message_update` (thinking fragment by fragment), `tool_execution_update` (stdout line by line). These make the agent look glacially slow when it's actually running at normal speed.
    - If you need a progress check during a long-running turn, just check `total_seen` increasing — don't read the individual delta events.
+   - **However, some models ARE genuinely slow at multi-turn code analysis.** Deepseek-v4-flash has been observed spending 10+ turns and generating 10–20k tokens per turn just exploring file structures (reading, ls, searching) without writing any code. In this case it's NOT poll noise — the model is genuinely spending time churning through exploration.
+   - **How to tell the difference:**
+     - Poll noise: model finishes its turn quickly (<30s per turn for simple reads), but streaming fragments make it look slow
+     - Genuine slowness: each turn takes 60s+, the model reads 3–5 files per turn, and needs 8+ turns of pure exploration before writing any output
+   - **What to do when a model is genuinely slow:**
+     - Follow the escalation path (see `references/model-escalation.md`): switch to a stronger model, re-send the prompt, switch back after breakthrough
+     - If the escalation model is unavailable (no credentials), fall back to direct work with terminal/file tools and report to the user
+     - Do NOT wait for the slow model to eventually finish — it's not a performance issue, it's a capability gap
 
-2. **Model speed matters for complex multi-turn tasks**
-   - deepseek-v4-flash on complex tasks (multi-turn research, file analysis, test runs) genuinely takes longer than a stronger model would. A ~30s task on a stronger model may take 2-3min on deepseek.
-   - **If the user has specified an escalation path** (e.g., "start deepseek, escalate to Codex 5.3 if stuck, then downgrade back"), **follow it**. Do not kill the agent and take over directly — the user expects the agent to self-escalate.
-   - When deepseek is genuinely stuck (prolonged silence >3 minutes with no tool calls), send a `set_model` command to switch to the escalation model specified by the user, then `set_model` back after the barrier is broken.
+3. **Follow user-specified escalation paths — don't kill the agent**
+   - If the user says "start with model X, escalate to model Y at barriers, then downgrade back" — **follow it exactly**. Do not kill the pi agent and take over directly via terminal or other tools. The user expects the agent to self-escalate.
+   - When stuck (prolonged silence >3 minutes with no tool calls), send a `set_model` command to switch to the escalation model, re-send the prompt, then `set_model` back after breakthrough.
    - See `references/model-escalation.md` for exact commands and lifecycle.
 
-2. **Mixing logs and JSON on stdout**
+4. **Mixing logs and JSON on stdout**
    - Ensure your wrapper only parses valid JSON lines.
-2. **Forgetting to persist `sessionFile`**
+
+5. **Forgetting to persist `sessionFile`**
    - Without it, exact continuity is harder (you only have `-c`).
-3. **Assuming one response line per command**
+
+6. **Assuming one response line per command**
    - RPC emits asynchronous events; match on command `id`/`command` response.
-4. **Using `--no-session` accidentally**
+
+7. **Using `--no-session` accidentally**
    - This disables persistence and breaks restart continuity.
-5. **Launching in the wrong repository**
+
+8. **Launching in the wrong repository**
    - RPC inherits current working directory. Start pi from the target project root (or set `cwd` in your wrapper), otherwise branch/diff analysis is against the wrong repo.
-6. **`wait()` returns massive output for multi-turn prompts**
+
+9. **`wait()` returns massive output for multi-turn prompts**
    - When pi runs 5–12 tool-calling turns (reading files, running tests, git analysis), the `wait()` response bundles all streaming deltas — think fragments, partial tool calls, text — into one 400K–800K+ char blob. This gets truncated in tool output.
    - **Fix:** Increase `timeout_seconds` to 180+ for research prompts. Extract the clean final text from the session JSONL file instead of parsing `wait()` output (see `references/response-extraction.md`).
-7. **Auth looks like transport failure**
+
+10. **Auth looks like transport failure**
    - If prompt calls fail with `No API key found for unknown`, RPC is healthy but provider auth is missing. Fix auth first (`OPENCODE_API_KEY` or `pi /login`) before debugging your wrapper.
+
+11. **Stale sessions accumulate and consume resources**
+   - Each `start` spawns a live pi process that sits in the background until killed. Over a long session you can accumulate 5–10 orphaned pi processes consuming RAM and file handles.
+   - **Prevention:** Always `stop` sessions when done with them. Use `action: stop` with `session_id`.
+   - **Cleanup:** Run `action: list` to see all sessions, then `action: stop` on each stale one. Or kill by PID: `ps aux | grep 'pi.*rpc' | grep -v grep` then `kill <PID>`.
+   - **Auto-cleanup:** The `action: prune` command only removes detached metadata entries (session file references), **not** live processes. Use `action: stop` for live sessions.
+
 
 See `references/rpc-pitfalls.md` for concrete error transcripts and fast triage checks.
 
@@ -238,7 +264,9 @@ See `references/rpc-pitfalls.md` for concrete error transcripts and fast triage 
 - `references/auth-and-extension-troubleshooting.md` — common auth and extension startup failures, plus deterministic fixes.
 - `references/response-extraction.md` — extracting pi's final text response from the session JSONL file when `wait()` returns truncated streaming delta data.
 - `references/hermes-stateful-tool-integration.md` — native Hermes `pi_agent` tool wiring (`start/send/poll/wait/stop/list`), registry verification, persistence file, and restart gotchas (detached sessions).
-
+- `references/rpc-pitfalls.md` — concrete error transcripts and fast triage checks for RPC issues.
+- `references/model-escalation.md` — switching mid-session between models (cheap → strong → back) when the user specifies an escalation path.
+- `references/model-capability-discovery.md` — testing which models support vision, transcription, or other capabilities; cost comparison before choosing a model.
 ## Verification checklist
 
 - [ ] `pi --mode rpc --help` works

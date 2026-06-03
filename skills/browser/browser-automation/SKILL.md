@@ -1,7 +1,7 @@
 ---
 name: browser-automation
 description: Browser automation via agent-browser CLI (Vercel Labs). Headless Chrome navigation, snapshots, clicks, fills, screenshots, eval, and batch flows for web research, UI testing, and QA.
-version: 1.1.0
+version: 1.3.0
 author: Dustin Chadwick (@ShaggyD)
 tags: [browser, automation, agent-browser, chrome, web-scraping, testing]
 license: MIT
@@ -106,7 +106,7 @@ agent-browser close
 - **No sandbox in containers**: This is the most common failure. Always include `--no-sandbox` in container/VM environments.
 - **First run**: `agent-browser` auto-downloads Chrome on first launch if not found. This can take a moment.
 - **Oversized pages**: Large snapshots auto-spill to files. Check `details.fullOutputPath` for the full content.
-- **Cloudflare / WAF bypass — maximum stealth combo (proven on Indeed, SimplyHired, ZipRecruiter):**
+- **Cloudflare / WAF bypass — maximum stealth combo (proven on multiple WAF-protected domains):**
 
   The stealth extension at `assets/stealth-extension/` patches `navigator.webdriver`, plugins array, languages, and permissions before any page scripts run. Combined with Chrome flags and a real UA, this has bypassed Cloudflare on all job aggregators tested.
 
@@ -134,6 +134,50 @@ agent-browser close
   - `--no-first-run` / `--no-default-browser-check` — avoids Chrome's first-run dialogs that give away automation
   - `set viewport` — realistic screen dimensions (headless default is smaller)
 
+  **LinkedIn job search (no login required):** LinkedIn serves job search results to unauthenticated users when the stealth combo is active. Verified on `linkedin.com/jobs/search/` — returns full job cards with titles, companies, locations, and direct apply links. No sign-in wall, no CAPTCHA.
+
+  ```bash
+  agent-browser close --all
+  agent-browser \
+    --args "--no-sandbox,--disable-gpu,--disable-dev-shm-usage,--disable-blink-features=AutomationControlled,--no-first-run,--no-default-browser-check" \
+    --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" \
+    --extension "$SKILL_DIR/assets/stealth-extension" \
+    open "https://www.linkedin.com/jobs/search/?keywords=KEYWORDS&location=LOCATION&f_TPR=r604800"
+  ```
+
+  LinkedIn uses dynamic/obfuscated CSS class names that change per session, so avoid targeting specific class names. Use the multi-selector fallback pattern for extraction:
+
+  ```javascript
+  // Multi-selector extraction for dynamic-class-name pages (LinkedIn, etc.)
+  const jobs = Array.from(document.querySelectorAll(
+    '.job-card-container, .base-card, .job-search-card, li[class*="jobs-search-results__list-item"]'
+  ));
+  JSON.stringify(jobs.map((j, i) => {
+    const titleEl = j.querySelector(
+      '.job-card-list__title, .base-search-card__title, .job-card-container__link, ' +
+      'h3, a[data-anonymize="job-title"]'
+    );
+    const companyEl = j.querySelector(
+      '.job-card-container__company-name, .base-search-card__subtitle, ' +
+      '.job-card-container__primary-description, .base-search-card__info h4 a'
+    );
+    const linkEl = titleEl?.tagName === 'A' ? titleEl : titleEl?.querySelector('a');
+    return {
+      title: titleEl?.innerText.trim() || 'N/A',
+      company: companyEl?.innerText.trim() || 'N/A',
+      location: j.querySelector(
+        '.job-card-container__metadata-item, .base-search-card__metadata, ' +
+        '.job-card-container__secondary-description'
+      )?.innerText.trim() || 'N/A',
+      time: j.querySelector('.job-card-container__listed-state, time, .job-search-card__listed-time')
+            ?.innerText.trim() || '',
+      link: linkEl?.href || (j.querySelector('a[href*="/jobs/view"]')?.href ?? '')
+    };
+  }));
+  ```
+
+  **Key insight:** Pass multiple CSS selectors comma-separated and query them all — LinkedIn renames classes per session but keeps semantic attribute patterns stable (`data-anonymize`, `href*="/jobs/view"`). Always fall back to `document.body.innerText` when structured extraction returns 0 items.
+
   **If still blocked:** try `--headed` on a desktop to see what Cloudflare shows, then add more patches to the `stealth.js` content script.
 
 - **WAF & CAPTCHA bot detection — fallback chain (if above fails):**
@@ -141,9 +185,16 @@ agent-browser close
   2. **Google search snippet extraction** — use `web_search("site:target.com ...", limit=50)` for aggregate data from indexed snippets. See `references/search-snippet-extraction.md`.
   3. **Employer-direct career portals** — job aggregators blocked? Hit the employer's own ATS (BambooHR, Paylocity, Workday, ADP). They rarely block. See `references/employer-direct-job-scraping.md`.
 
+## MCP Server Alternative
+
+The `stealth-browser-mcp` skill (`../stealth-browser-mcp/`) exposes the same stealth browser capabilities as **native agent tools** via an MCP server. Instead of CLI commands, the agent calls dedicated tools (`navigate`, `snapshot`, `click`, `eval`). The MCP server bundles the stealth extension inline — no external skill dependency.
+
+Use browser-automation when you want CLI instructions. Use stealth-browser-mcp when you want tool-based integration with Hermes' tool system.
+
 ## References
 
 - `references/waf-protected-site-scraping.md` — Concrete agent-browser patterns for extracting data from Cloudflare/Akamai-protected sites using the stealth extension: general extraction approach, real-world use cases (AI pricing, SaaS docs, e-commerce, web app E2E), and employer-direct ATS fallback.
 - `references/content-editing-feedback-loop.md` — Edit → screenshot → deliver → iterate workflow for collaborative web content editing with the user.
 - `references/structured-data-extraction.md` — Extracting pricing tables, spec sheets, and structured data from JS-rendered pages via eval + text parsing. Covers OpenAI, Anthropic, DeepSeek, and Kimi/Moonshot.
 - `references/search-snippet-extraction.md` — Google search snippet fallback for sites behind CAPTCHA that still have indexed content.
+- `references/linkedin-job-scraping.md` — LinkedIn job search extraction: no-login access, multi-selector JSON extraction for dynamic class names, page pagination, and fallback strategies.

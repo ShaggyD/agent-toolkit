@@ -1,7 +1,7 @@
 ---
 name: karakeep-obsidian-sync
 description: Full CRUD CLI for Karakeep — standalone bookmarking tool with optional Obsidian vault sync
-version: 0.5.0
+version: 0.5.1
 author: Dustin Chadwick
 metadata:
   hermes:
@@ -138,6 +138,7 @@ This skill was refactored from a personal tool to a distributable one. Key lesso
 - **Interactive onboarding, but skippable.** `kk login` asks about vault setup, but you can hit enter to skip and configure later.
 - **Relative backlinks.** `[[_Index|Bookmarks]]` works from any vault folder — no hardcoded paths.
 - **No personal conventions.** Status tags, PARA structure assumptions, and author-specific frontmatter fields are excluded from generated content.
+- **YouTube Shorts support.** `_extract_youtube_id` must handle `/shorts/` URLs — these URLs don't match `/watch`, `/embed/`, or `/v/` patterns. Without it, Shorts fall through to article enrichment and never get a `## Transcript` section, creating an infinite loop in `--next`.
 - **Graceful degradation.** If uv or curl are missing, enrichment silently skips rather than crashing. The note still gets created.
 - **Best-effort enrichment.** YouTube transcripts via uv (tool installed on-the-fly, no permanent dependency — see `references/uv-adhoc-deps.md`). Article text via curl + stdlib HTML parsing. Failures don't block the sync.
 
@@ -151,3 +152,5 @@ This skill was refactored from a personal tool to a distributable one. Key lesso
 - **Filename collisions** — bookmarks without a title/content map to `unknown-untitled.md`
 - **Python 3.7+ required** (for `pathlib` and `datetime.fromisoformat`)
 - **Empty DELETE responses** — API returns 204 No Content. Tool handles empty body gracefully
+- **`--next` vs `--list` discrepancy with orphan bookmarks** — `kk enrich --next` only processes vault files that have a non-empty `karakeep_id` in frontmatter. Bookmarks created manually in the vault (no Karakeep record) are invisible to `--next`, so it may report "All enriched" while `--list` still shows remaining. Meanwhile, `--list` only checks for the `## Transcript` header string — it does not filter by `karakeep_id`. If you see a mismatch between the two commands, check missing karakeep_ids and custom header names (e.g., `## Raw Transcript` won't match `## Transcript`). Reconcile by either adding a Karakeep entry or tweaking the transcript header in the vault file.
+- **Transcript header matching is strict** — enrichment detection checks for the literal string `## Transcript`. Variants like `## Raw Transcript`, `## Full Transcript`, or `## YouTube Transcript` are not recognized as enriched. If a vault file has a transcript under a different heading, `--list` will show it as un-enriched and `--next` may loop over it. Keep the header exactly `## Transcript`.

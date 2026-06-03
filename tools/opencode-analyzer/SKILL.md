@@ -10,6 +10,8 @@ tags: [opencode, costs, analysis, productivity]
 
 OpenCode cost analyzer with detailed daily/weekly/monthly breakdowns. Shows what you actually spent vs what it would cost on OpenRouter, plus same-token model comparisons.
 
+**SCOPE:** This skill covers **OpenCode** cost analysis only. OpenCode and OpenAI Codex CLI are separate tools with separate cost databases. Do NOT use this to analyze Codex CLI costs — see `references/codex-cli-monitoring.md`.
+
 ## What It Does
 
 Queries your local OpenCode SQLite database to show:
@@ -200,3 +202,11 @@ sudo apt-get install sqlite3
 
 - [OpenCode](https://github.com/opencode-ai/opencode) - AI coding agent
 - [OpenRouter](https://openrouter.ai) - Unified API for LLMs
+- `references/codex-cli-monitoring.md` — Cost monitoring for **OpenAI Codex CLI** (separate tool from OpenCode)
+
+## Pitfalls
+
+- **OpenCode vs Codex CLI**: This skill is for **OpenCode** only. OpenAI Codex CLI uses a completely separate session storage (`~/.codex/sessions/`) and model pricing. Do NOT use `opencode-cost` to check Codex usage — use the codex-usage-monitor.py script instead (see `references/codex-cli-monitoring.md`).
+- **Database detection**: If `opencode-cost` can't find the database, run `find ~ -name "opencode.db" 2>/dev/null` and pass with `--db`.
+- **Free models show estimates**: Free-tier OpenCode models are repriced at OpenRouter rates. Actual cost was $0, but the estimate shows what a paid equivalent would cost.
+- **Session files cleared**: If you clear OpenCode session databases, historical data resets. The script only sees what's in the DB.

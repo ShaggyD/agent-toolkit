@@ -227,6 +227,47 @@ DEAD CODE IDENTIFIED:
 → Safe to remove these?
 ```
 
+### Static Site / HTML+CSS Dead Code Detection
+
+For single-page sites or HTML-with-embedded-CSS projects (portfolio sites, landing pages), dead code takes different forms than compiled apps. The full stylesheet is inline, so unused CSS doesn't get tree-shaken — it sits in the file forever.
+
+**Method: cross-reference CSS class definitions against HTML usage**
+
+1. **Extract CSS class selectors** — search the `<style>` block for patterns like `.class-name {`. Build a list of defined classes.
+2. **Search HTML body** — for each class, search the HTML body (content after `</style>`) for `class="..."` attribute usage.
+3. **Classes defined but never used in HTML are dead** — remove them.
+4. **Also check compound selectors** — classes used only in CSS (e.g. `.something:hover`, `.something::before`) are fine if they're defined — the HTML just needs the base class.
+
+**Additional CSS dead code patterns:**
+
+| Pattern | How to detect | Example |
+|---------|--------------|---------|
+| Orphaned selector lists | Selectors with trailing commas and no property block | `.metric, .chart,` followed by whitespace and then an unrelated rule |
+| Dead media query references | Selectors in `@media` block that don't exist in CSS or HTML | `.featured-card,` in the responsive section when `.featured-card` is never defined |
+| Carousel/slider remnants | `.arrow-btn`, `.round-btn`, pagination dots | Carousel CSS left behind after a design change to static cards |
+| Removed section stubs | `.date-pill`, `.featured-copy` | CSS for a section that was cut but the styles remained |
+
+**Quick check command (Python with search_files):**
+
+```python
+from hermes_tools import search_files
+
+# Check each candidate class
+for cls in ['arrow-btn', 'round-btn', 'date-pill', 'metric', 'chart']:
+    r = search_files(f'class="[^"]*\\b{cls}\\b[^"]*"', target='content', path='/path/to/index.html')
+    count = len(r.get('matches', []))
+    print(f'{cls}: {count} HTML occurrences')  # 0 = dead
+```
+
+### CSS structural issues
+
+When reviewing inline CSS, check for:
+
+- **Orphaned commas** — `selector-a,` followed by a newline and then `selector-b` with no `{` — the browser ignores the first selector entirely
+- **Broken max-width on sidebar content** — `.tl-achievement` with `max-width: 42ch` may overflow a narrow sidebar; override with `max-width: 100%` in sidebar context
+- **Sticky positioning conflicts** — `position: sticky` inside a flex container needs `align-self: start` and a defined `top` value that clears the nav bar
+- **Mask-image on sticky elements** — CSS mask gradients on sticky sidebars fade the content as the user scrolls; ensure the fade point (e.g. `black 80%`) aligns with the sidebar's visible height
+
 ## Review Speed
 
 Slow reviews block entire teams. The cost of context-switching to review is less than the waiting cost imposed on others.
@@ -319,6 +360,7 @@ Part of code review is dependency review:
 
 - For detailed security review guidance, see `../../references/security-checklist.md`
 - For performance review checks, see `../../references/performance-checklist.md`
+- For automated test coverage gap analysis, see `references/test-coverage-audit.md`
 
 ## Common Rationalizations
 

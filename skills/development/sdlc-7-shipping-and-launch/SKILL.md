@@ -79,6 +79,81 @@ This skill is optional and should be used when release/deployment discipline is 
 - [ ] Changelog updated
 - [ ] User-facing documentation updated (if applicable)
 
+### Social & SEO
+
+- [ ] OG meta tags present (og:title, og:description, og:image, og:url)
+- [ ] OG image is 1200×630 PNG, optimized (< 300KB target), deployed and accessible
+- [ ] Twitter card meta tags present (twitter:card, twitter:title, twitter:image)
+- [ ] Tested share preview in a real messenger (iOS Messages, Slack, Discord)
+
+## Goal Completion Audit
+
+### When to run this audit
+
+Before declaring a standing goal complete, before marking a milestone done, or whenever you're about to say "this is complete." Run it even when tests pass — passing tests don't catch stale docs, uncommitted work, git debris, or honest re-evaluation failures.
+
+### The multi-pass audit
+
+Do these in order. Each pass catches something the previous one missed.
+
+```
+Pass 1: Test suite
+  ├── Run full suite: npm test (or equivalent)
+  ├── Note the exact test count and suite count
+  └── Fix any failures before proceeding
+
+Pass 2: TypeScript / lint
+  └── tsc --noEmit (or equivalent type checker) — must be 0 errors
+
+Pass 3: Documentation accuracy
+  ├── Do README counts match actual test/suite counts? Fix if stale.
+  ├── Do PLAN.md or ROADMAP.md items reflect reality?
+  └── Are there unchecked items you've been dismissing without re-examining?
+
+Pass 4: Git hygiene
+  ├── Working tree clean? (git status --short)
+  ├── On the right branch? (main/master, not a feature branch)
+  ├── Commits pushed to origin? (git log origin/main..main)
+  └── Stale branches or remote-tracking refs to prune? (git branch -a, git remote prune)
+
+Pass 5: Stale artifacts
+  ├── Superseded feature branches that should be cleaned up
+  ├── Dead or orphaned files (moved components, old lock files, deprecated config)
+  ├── TODO/FIXME comments that should be resolved
+  └── Outdated PLAN.md or status docs with wrong completion markers
+```
+
+### Honest re-evaluation of deferred items
+
+This is the most important and most-skipped step. When you see unchecked items you've told yourself are "not meaningful" or "blocked":
+
+1. **Re-examine each one with fresh eyes.** Load the relevant code/docs instead of relying on your memory of why you dismissed it.
+2. **Ask the hard question:** Is this actually not meaningful, or did I want it to not be meaningful because it saves work?
+3. **If truly not actionable, update its description** to explain *why* (e.g., "can't pass dynamic params to TinyBase views" is better than "not meaningful").
+4. **If blocked externally** (e.g., needs device/emulator), verify the block is still real — don't carry stale blockers forward.
+5. **Document your reasoning** in PLAN.md or the relevant checklist so the next reader knows it was honestly evaluated.
+
+### Common pitfalls
+
+- **Stale test counts in README** — tests were added but README wasn't updated. Always check the actual `jest --listTests` output, not what you think it should be.
+- **"Tests pass, so we're done"** — tests are necessary but not sufficient. Documentation, git state, and deferred-item honesty are equally important.
+- **"This isn't meaningful" without verification** — dismissing an item because you think it's not worth doing is different from proving it isn't worth doing. Verify before dismissing.
+- **Clean tree assumption** — never assume the working tree is clean. Run `git status --short` every time.
+- **Stale branches in `git branch -a`** — remote-tracking refs persist even after the branch is gone. `git remote prune origin` is your friend.
+- **Unpushed commits** — `git log origin/main..main` shows what hasn't been pushed. Easy to forget after a long session.
+
+### Verification checklist
+
+- [ ] Test suite passes with exact count: ______ suites, ______ tests
+- [ ] tsc --noEmit: 0 errors
+- [ ] README counts match actual test metrics
+- [ ] PLAN.md/ROADMAP.md status is accurate
+- [ ] Working tree clean
+- [ ] On correct branch and pushed to origin
+- [ ] Stale branches pruned
+- [ ] Deferred items re-examined and documented honestly
+- [ ] Decision to declare complete is based on evidence, not convenience
+
 ## Feature Flag Strategy
 
 Ship behind feature flags to decouple deployment from release:
@@ -143,6 +218,21 @@ return null;
    └── Monitor for 1 week
    └── Clean up feature flag
 ```
+
+### Dry-Run and Observation Periods for Data-Modifying Tools
+
+When deploying a tool or script that modifies user data (archives email, deletes files, bulk-updates records, etc.):
+
+- **Always start in dry-run / log-only mode** — the tool records what it WOULD do without actually doing it. Agree on the observation period upfront (24h recommended as starting point).
+- **Do not skip to live mode** without explicit sign-off from the user or orchestrator after reviewing dry-run logs. Even a well-tested tool deserves an observation buffer before touching real data.
+- **Config-driven safety** — the dry-run/live toggle belongs in a config file (`dry_run: true/false`), not in code. Flip modes without redeploying.
+- **If an agent built the tool**, the orchestrator verifies the mode BEFORE the first scheduled execution. Do not assume the agent set the right mode — check.
+- **Document the observation period** in the relevant kanban card so the team knows when review is due.
+- **Logs during dry-run** should include the same detail as live runs (what would be modified, counts, patterns matched) so the review is meaningful.
+
+**Pitfall — skipping the agreed process:** When orchestrator and user agree on a phased rollout ("24h dry run first"), every agent executing the work must respect that. Running live mutations during the observation period undermines trust regardless of outcome. If a worker agent attempts to skip ahead, the orchestrator catches it and enforces the process.
+
+**Pitfall — "dry-run passed, ship it":** Running successfully in dry-run proves the tool doesn't crash. It doesn't mean the user is ready for real mutations. Respect the agreed window.
 
 ### Rollout Decision Thresholds
 
@@ -273,6 +363,7 @@ Every deployment needs a rollback plan before it happens:
 - For security pre-launch checks, see `../../references/security-checklist.md`
 - For performance pre-launch checklist, see `../../references/performance-checklist.md`
 - For accessibility verification before launch, see `../../references/accessibility-checklist.md`
+- For Cloudflare Pages + GitHub deployment setup, see `references/cloudflare-pages-deployment.md`
 
 ## Common Rationalizations
 
