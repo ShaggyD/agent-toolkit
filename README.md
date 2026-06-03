@@ -1,95 +1,174 @@
 # agent-toolkit
 
-Skills, tools, MCP servers, browser extensions, and UI themes for AI agents. Everything here was built for something specific, not as a demo. Provider-agnostic except for the hermes/ directory.
+Skills, tools, MCP servers, browser extensions, and UI themes for AI agents. Built for developers who need practical, tested components instead of hello-world examples. Provider-agnostic except for the hermes/ directory.
+
+All items follow a simple format: the problem that needed solving, what was built, and the outcome. Detail lives in each artifact's own docs.
 
 ---
 
-## Sections
+## productivity/
 
-### productivity/
+Daily agent workflows.
 
-<table>
-<tr><td nowrap><a href="productivity/agent-constitution-setup/">agent-constitution-setup</a></td><td><b>Problem:</b> Agents drift when they don't know who you are or what you value.<br><b>Built:</b> Three documents (constitution, goals, strategy) based on <a href="https://www.youtube.com/watch?v=YfRkj9kmQf0">Allie Miller's framework from the Silicon Valley Girl podcast</a> (hosted by Marina Mogilko).<br><b>Outcome:</b> The agent acts consistent with your intent instead of guessing.</td></tr>
-</table>
+#### agent-constitution-setup
+**Problem:** Agents drift when they don't know who you are or what you value.
+**Built:** Three documents (constitution, goals, strategy) based on [Allie Miller's framework from the Silicon Valley Girl podcast](https://www.youtube.com/watch?v=YfRkj9kmQf0) (hosted by Marina Mogilko).
+**Outcome:** The agent acts consistent with your intent instead of guessing.
 
-### development/
+#### file-size-gatekeeper
+**Problem:** Files grow unchecked and silently degrade agent performance until you notice instructions being ignored.
+**Built:** A skill that enforces file size discipline, audits bloated files, and encodes four techniques from [Andrew's OpenClaw Blueprint video](https://youtu.be/5ec5mh41oig) on the 18,000 character trap.
+**Outcome:** Your agent actually reads every instruction because nothing gets truncated or pushed out of context.
 
-SDLC pipeline in 7 ordered phases, adapted from <a href="https://github.com/addyosmani/agent-skills">addyosmani/agent-skills</a> (MIT).
+#### macos-task-scheduler
+**Problem:** Setting up recurring tasks on macOS means wrestling with launchd plist syntax and remembering the right load/unload commands.
+**Built:** A skill that handles launchd configuration, scheduling syntax, and task lifecycle (load, unload, start, stop) so you don't have to.
+**Outcome:** Schedule scripts without touching XML or digging through man pages.
 
-<table>
-<tr><td nowrap><a href="development/sdlc-1-spec-driven-development/">sdlc-1-spec-driven-development</a></td><td><b>Problem:</b> Most bugs come from unclear requirements.<br><b>Built:</b> A phase that forces you to write down objective, assumptions, and boundaries before any code gets written.<br><b>Outcome:</b> Catches ambiguity early when it's cheap to fix.</td></tr>
-<tr><td nowrap><a href="development/sdlc-2-planning-and-task-breakdown/">sdlc-2-planning-and-task-breakdown</a></td><td><b>Problem:</b> A spec without a plan leads to messy execution.<br><b>Built:</b> Breaks specs into ordered, dependency-aware tasks.<br><b>Outcome:</b> Nothing gets built before its prerequisites are ready.</td></tr>
-<tr><td nowrap><a href="development/sdlc-3-incremental-implementation/">sdlc-3-incremental-implementation</a></td><td><b>Problem:</b> Big bang merges break things and hide who broke what.<br><b>Built:</b> Thin, testable vertical slices.<br><b>Outcome:</b> Each piece works before the next one starts.</td></tr>
-<tr><td nowrap><a href="development/sdlc-4-test-driven-development/">sdlc-4-test-driven-development</a></td><td><b>Problem:</b> Writing tests after the code means tests that pass against broken logic.<br><b>Built:</b> Red-Green-Refactor and reproduction-first bug fixes.<br><b>Outcome:</b> The test suite stays honest and the code stays correct.</td></tr>
-<tr><td nowrap><a href="development/sdlc-5-code-review-and-quality/">sdlc-5-code-review-and-quality</a></td><td><b>Problem:</b> Merging without review lets bad patterns compound.<br><b>Built:</b> Five-axis review gates (correctness, security, performance, style, test coverage).<br><b>Outcome:</b> Catches what the author missed.</td></tr>
-<tr><td nowrap><a href="development/sdlc-6-code-simplification/">sdlc-6-code-simplification</a></td><td><b>Problem:</b> Code that works but is hard to understand is technical debt waiting to compound.<br><b>Built:</b> Systematic complexity reduction without behavior changes.<br><b>Outcome:</b> The next person can reason about the code.</td></tr>
-<tr><td nowrap><a href="development/sdlc-7-shipping-and-launch/">sdlc-7-shipping-and-launch</a></td><td><b>Problem:</b> A clean merge doesn't mean a clean deploy.<br><b>Built:</b> Rollout, monitoring, and rollback discipline.<br><b>Outcome:</b> The launch doesn't become the incident.</td></tr>
-</table>
+---
 
-### browser/
+## development/
 
-<table>
-<tr><td nowrap><a href="browser/browser-automation/">browser-automation</a></td><td><b>Problem:</b> Standard headless browsers get blocked by Cloudflare and LinkedIn immediately.<br><b>Built:</b> <a href="https://github.com/vercel/agent-browser">agent-browser CLI (Vercel Labs)</a> combined with a stealth Chrome extension that patches browser fingerprint vectors at document_start, before any page scripts run.<br><b>Outcome:</b> Gets through WAFs that normally stop automated browsing cold.</td></tr>
-</table>
+SDLC pipeline in 7 ordered phases.
 
-### autonomous-agents/
+#### sdlc-1-spec-driven-development
+**Problem:** Most bugs come from unclear requirements.
+**Built:** A phase that forces you to write down objective, assumptions, and boundaries before any code gets written.
+**Outcome:** Catches ambiguity early when it's cheap to fix.
 
-<table>
-<tr><td nowrap><a href="autonomous-agents/pi-agent/">pi-agent</a></td><td><b>Problem:</b> Remote coding agents lose state when sessions break or auth expires.<br><b>Built:</b> A skill covering session lifecycle, RPC control, response extraction, and failure recovery for pi --mode rpc.<br><b>Outcome:</b> Agents stay connected and working reliably across restarts.</td></tr>
-</table>
+#### sdlc-2-planning-and-task-breakdown
+**Problem:** A spec without a plan leads to messy execution.
+**Built:** Breaks specs into ordered, dependency-aware tasks.
+**Outcome:** Nothing gets built before its prerequisites are ready.
 
-### tools/
+#### sdlc-3-incremental-implementation
+**Problem:** Big bang merges break things and hide who broke what.
+**Built:** Thin, testable vertical slices.
+**Outcome:** Each piece works before the next one starts.
 
-<table>
-<tr><td nowrap><a href="tools/karakeep/">karakeep</a></td><td><b>Problem:</b> Most bookmarking tools are either SaaS or require heavy setup with databases and config.<br><b>Built:</b> A single Python file with zero dependencies that gives you full CRUD on Karakeep and optionally syncs to Obsidian.<br><b>Outcome:</b> Ready to use the second you download it.</td></tr>
-<tr><td nowrap><a href="tools/opencode-analyzer/">opencode-analyzer</a></td><td><b>Problem:</b> OpenCode costs add up fast and the CLI doesn't tell you what you're actually spending.<br><b>Built:</b> Usage breakdowns by day, week, and month with comparisons to OpenRouter equivalents.<br><b>Outcome:</b> You see budget drift before it becomes a surprise bill.</td></tr>
-<tr><td nowrap><a href="tools/email-triage/">email-triage</a></td><td><b>Problem:</b> Gmail piles up noise faster than you can triage it.<br><b>Built:</b> A two-layer pipeline: a zero-LLM archiver that filters noise instantly without spending tokens, and an LLM-powered reviewer that surfaces only the signal.<br><b>Outcome:</b> Noise is gone before you even see it.</td></tr>
-</table>
+#### sdlc-4-test-driven-development
+**Problem:** Writing tests after the code means tests that pass against broken logic.
+**Built:** Red-Green-Refactor and reproduction-first bug fixes.
+**Outcome:** The test suite stays honest and the code stays correct.
 
-### mcp/
+#### sdlc-5-code-review-and-quality
+**Problem:** Merging without review lets bad patterns compound.
+**Built:** Five-axis review gates (correctness, security, performance, style, test coverage).
+**Outcome:** Catches what the author missed.
 
-<table>
-<tr><td nowrap><a href="mcp/stealth-browser/">stealth-browser</a></td><td><b>Problem:</b> Browser automation MCP servers hit the same WAF blocks as everything else.<br><b>Built:</b> Wraps <a href="https://github.com/vercel/agent-browser">agent-browser CLI (Vercel Labs)</a> with anti-detection flags and a stealth extension bundled inline with no external dependency. Exposes 10 tools (navigate, click, eval, screenshot, and more).<br><b>Outcome:</b> Works through Cloudflare and LinkedIn from any MCP-compatible agent.</td></tr>
-</table>
+#### sdlc-6-code-simplification
+**Problem:** Code that works but is hard to understand is technical debt waiting to compound.
+**Built:** Systematic complexity reduction without behavior changes.
+**Outcome:** The next person can reason about the code.
 
-### extensions/
+#### sdlc-7-shipping-and-launch
+**Problem:** A clean merge doesn't mean a clean deploy.
+**Built:** Rollout, monitoring, and rollback discipline.
+**Outcome:** The launch doesn't become the incident.
 
-<table>
-<tr><td nowrap><a href="extensions/stealth-extension/">stealth-extension</a></td><td><b>Problem:</b> Most stealth extensions load too late when fingerprint signals are already exposed.<br><b>Built:</b> A Manifest V3 extension that runs at document_start, before any page script executes, and patches navigator.webdriver, plugins, languages, and Permissions API.<br><b>Outcome:</b> By the time the page loads, your browser looks native.</td></tr>
-</table>
+---
 
-### themes/
+## browser/
 
-<table>
-<tr><td nowrap><a href="themes/hermes-dashboard/">hermes-dashboard</a></td><td><b>Problem:</b> The default Hermes dashboard gets the job done but doesn't suit every environment.<br><b>Built:</b> Two themes: Clean WebUI for a bright, minimal workspace and Gruvbox Dark for warm-toned low-light sessions.<br><b>Outcome:</b> Drop them in and the dashboard matches your setup.</td></tr>
-</table>
+#### browser-automation
+**Problem:** Standard headless browsers get blocked by Cloudflare and LinkedIn immediately.
+**Built:** [agent-browser CLI (Vercel Labs)](https://github.com/vercel/agent-browser) combined with a stealth Chrome extension that patches browser fingerprint vectors at document_start, before any page scripts run.
+**Outcome:** Gets through WAFs that normally stop automated browsing cold.
 
-### hermes/
+---
 
-<table>
-<tr><td nowrap><a href="hermes/pi-agent/">pi-agent</a></td><td><b>Problem:</b> Using pi RPC from Hermes meant manually managing sessions and parsing raw responses.<br><b>Built:</b> A plugin that wraps the full lifecycle (start, send, poll, stop) as native Hermes tools, tested against the actual pi protocol.<br><b>Outcome:</b> Handles edge cases and auth failures cleanly.</td></tr>
-</table>
+## autonomous-agents/
 
-### references/
+#### pi-agent
+**Problem:** Remote coding agents lose state when sessions break or auth expires.
+**Built:** A skill covering session lifecycle, RPC control, response extraction, and failure recovery for pi --mode rpc.
+**Outcome:** Your coding agent survives terminal restarts, auth reconnects, and network blips without losing context.
 
-Shared checklists imported from <a href="https://github.com/addyosmani/agent-skills">addyosmani/agent-skills</a> (MIT).
+---
 
-- security-checklist.md
-- performance-checklist.md
-- accessibility-checklist.md
-- testing-patterns.md
+## tools/
+
+Standalone CLIs, each with their own docs.
+
+#### karakeep
+**Problem:** Most bookmarking tools are either SaaS or require heavy setup with databases and config.
+**Built:** A single Python file with zero dependencies that gives you full CRUD on Karakeep and optionally syncs to Obsidian.
+**Outcome:** Ready to use the second you download it.
+
+#### opencode-analyzer
+**Problem:** OpenCode costs add up fast and the CLI doesn't tell you what you're actually spending.
+**Built:** Usage breakdowns by day, week, and month with comparisons to OpenRouter equivalents.
+**Outcome:** You see budget drift before it becomes a surprise bill.
+
+#### email-triage
+**Problem:** Gmail piles up noise faster than you can triage it.
+**Built:** A two-layer pipeline: a zero-LLM archiver that filters noise instantly without spending tokens, and an LLM-powered reviewer that surfaces only the signal.
+**Outcome:** Noise is gone before you even see it.
+
+---
+
+## mcp/
+
+MCP servers for agent platforms.
+
+#### stealth-browser
+**Problem:** Browser automation MCP servers hit the same WAF blocks as everything else.
+**Built:** Wraps [agent-browser CLI (Vercel Labs)](https://github.com/vercel/agent-browser) with anti-detection flags and a stealth extension bundled inline with no external dependency. Exposes 10 tools (navigate, click, eval, screenshot, and more).
+**Outcome:** Works through Cloudflare and LinkedIn from any MCP-compatible agent.
+
+---
+
+## extensions/
+
+Browser extensions.
+
+#### stealth-extension
+**Problem:** Most stealth extensions load too late when fingerprint signals are already exposed.
+**Built:** A Manifest V3 extension that runs at document_start, before any page script executes, and patches navigator.webdriver, plugins, languages, and Permissions API.
+**Outcome:** By the time the page loads, your browser looks native.
+
+---
+
+## themes/
+
+#### hermes-dashboard
+**Problem:** Staring at a bright dashboard in a dark room gets old fast.
+**Built:** Two themes: Clean WebUI for a bright, minimal workspace and Gruvbox Dark for warm-toned low-light sessions.
+**Outcome:** Drop them in and the dashboard matches your environment instead of fighting it.
+
+---
+
+## hermes/
+
+Platform-specific tooling for Hermes Agent.
+
+#### pi-agent
+**Problem:** Using pi RPC from Hermes meant manually managing sessions and parsing raw responses.
+**Built:** A plugin that wraps the full lifecycle (start, send, poll, stop) as native Hermes tools, tested against the actual pi protocol.
+**Outcome:** Handles edge cases and auth failures cleanly without manual session wrangling.
+
+---
+
+## references/
+
+Shared checklists.
+
+- [security-checklist.md](references/security-checklist.md)
+- [performance-checklist.md](references/performance-checklist.md)
+- [accessibility-checklist.md](references/accessibility-checklist.md)
+- [testing-patterns.md](references/testing-patterns.md)
 
 ---
 
 ## Usage
 
-```
+```bash
 git clone git@github.com:ShaggyD/agent-toolkit.git ~/agent-toolkit
 
-# Hermes: symlink for skill discovery
+# For Hermes users: symlink for skill discovery
 ln -sf ~/agent-toolkit ~/.hermes/skills
 
-# Load a skill
+# Load a skill (hermes -s <name> or /skill <name>)
 hermes -s browser-automation
 
 # Register an MCP server
@@ -107,11 +186,10 @@ MIT - use freely, adapt openly, attribute where meaningful.
 
 Attribution:
 
-- SDLC skills adapted from <a href="https://github.com/addyosmani/agent-skills">addyosmani/agent-skills</a> (MIT)
-- Shared checklists from <a href="https://github.com/addyosmani/agent-skills">addyosmani/agent-skills</a> (MIT)
-- Constitution framework by <a href="https://www.youtube.com/watch?v=YfRkj9kmQf0">Allie Miller via Silicon Valley Girl podcast</a> (hosted by Marina Mogilko)
-- Browser automation built with <a href="https://github.com/vercel/agent-browser">agent-browser CLI (Vercel Labs)</a>
-- File-size-gatekeeper inspired by <a href="https://youtu.be/5ec5mh41oig">Andrew's OpenClaw Blueprint Series</a>
+- SDLC skills and shared checklists adapted from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT)
+- Constitution framework by [Allie Miller via Silicon Valley Girl podcast](https://www.youtube.com/watch?v=YfRkj9kmQf0) (hosted by Marina Mogilko)
+- Browser automation built with [agent-browser CLI (Vercel Labs)](https://github.com/vercel/agent-browser)
+- File-size-gatekeeper inspired by [Andrew's OpenClaw Blueprint Series](https://youtu.be/5ec5mh41oig)
 
 ---
 
